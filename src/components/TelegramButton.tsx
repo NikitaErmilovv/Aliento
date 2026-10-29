@@ -33,7 +33,7 @@ export function TelegramButton({
         "group inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 text-center max-sm:whitespace-normal sm:whitespace-nowrap",
         size === "lg" ? "px-5 py-3.5 text-sm sm:px-7 sm:py-4 sm:text-base" : "px-5 py-3 text-sm",
         variant === "primary" &&
-          "bg-foreground text-background hover:bg-accent-300 hover:-translate-y-0.5 shadow-[0_0_0_0_rgba(138,114,245,0)] hover:shadow-[0_8px_30px_-8px_rgba(138,114,245,0.6)]",
+          "bg-foreground text-background hover:bg-accent-300 hover:-translate-y-0.5 shadow-[0_0_0_0_rgba(251,237,163,0)] hover:shadow-[0_8px_30px_-8px_rgba(251,237,163,0.45)]",
         variant === "secondary" &&
           "glass-card text-foreground hover:border-accent-400/50 hover:-translate-y-0.5",
         variant === "ghost" &&

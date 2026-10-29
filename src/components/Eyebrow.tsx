@@ -14,7 +14,7 @@ export function Eyebrow({
         className
       )}
     >
-      <span className="h-1.5 w-1.5 rounded-full bg-accent-400 shadow-[0_0_10px_2px_rgba(167,148,251,0.8)]" />
+      <span className="h-1.5 w-1.5 rounded-full bg-accent-400 shadow-[0_0_10px_2px_rgba(251,237,163,0.75)]" />
       {children}
     </span>
   );

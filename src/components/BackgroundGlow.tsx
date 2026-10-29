@@ -1,8 +1,7 @@
 import { cn } from "@/lib/cn";
 
 /**
- * Decorative ambient background: soft purple star-glow blobs echoing the
- * Aliento logo glow, plus faint orbiting line-art. Purely presentational.
+ * Decorative ambient background: soft warm glow (D2-style accent), plus faint line-art.
  */
 export function BackgroundGlow({
   className,
@@ -25,7 +24,7 @@ export function BackgroundGlow({
         )}
         style={{
           background:
-            "radial-gradient(circle, rgba(167,148,251,0.55) 0%, rgba(108,83,221,0.28) 45%, rgba(108,83,221,0) 75%)",
+            "radial-gradient(circle, rgba(251,237,163,0.42) 0%, rgba(212,194,122,0.22) 45%, rgba(212,194,122,0) 75%)",
         }}
       />
       <div
@@ -37,7 +36,7 @@ export function BackgroundGlow({
         )}
         style={{
           background:
-            "radial-gradient(circle, rgba(199,188,255,0.45) 0%, rgba(78,58,168,0.2) 55%, rgba(78,58,168,0) 80%)",
+            "radial-gradient(circle, rgba(255,241,188,0.32) 0%, rgba(168,148,88,0.16) 55%, rgba(168,148,88,0) 80%)",
         }}
       />
 

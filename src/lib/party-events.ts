@@ -193,8 +193,8 @@ export function partyCoverImage(number: number) {
 export function getPartyTheme(number: number): PartyTheme {
   return (
     PARTY_CATALOG.find((item) => item.number === number)?.theme ?? {
-      gradient: "linear-gradient(145deg, #1e1815 0%, #6f4c27 100%)",
-      glow: "#cfa876",
+      gradient: "linear-gradient(145deg, #1e1815 0%, #a89458 100%)",
+      glow: "#fbeda3",
     }
   );
 }
