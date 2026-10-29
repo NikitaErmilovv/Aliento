@@ -7,7 +7,7 @@ import { BookButton } from "@/components/BookButton";
 import { CtaBanner } from "@/components/CtaBanner";
 import { Container } from "@/components/Container";
 import { ButtonLink } from "@/components/ButtonLink";
-import { HallGridSection } from "@/components/HallHallsClient";
+import { HallGridSection } from "@/components/HallGridSection";
 import { HallLegend } from "@/components/HallLegend";
 import { HallWeekNav } from "@/components/HallWeekNav";
 import { buildMetadata } from "@/lib/metadata";
@@ -29,7 +29,8 @@ export const metadata = buildMetadata({
 });
 
 export default async function SchedulePage() {
-  const user = await getCurrentUser();
+  const user =
+    process.env.ALIENTO_MELISSA_EXPORT === "1" ? null : await getCurrentUser();
   const weekStart = startOfWeek(new Date());
   const weekStartIso = isoDate(weekStart);
 

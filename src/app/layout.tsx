@@ -119,7 +119,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUser();
+  const user =
+    process.env.ALIENTO_MELISSA_EXPORT === "1" ? null : await getCurrentUser();
 
   return (
     <html
