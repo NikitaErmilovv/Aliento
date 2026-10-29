@@ -7,6 +7,7 @@ import { HomeDirectionsSection } from "@/components/landing/HomeDirectionsSectio
 import { HomeHallSection } from "@/components/landing/HomeHallSection";
 import { HomePartiesSection } from "@/components/landing/HomePartiesSection";
 import { HomePriceSection } from "@/components/landing/HomePriceSection";
+import { HomeLocationSection } from "@/components/landing/HomeLocationSection";
 import { HomeReviewsSection } from "@/components/landing/HomeReviewsSection";
 import { HomeScheduleSection } from "@/components/landing/HomeScheduleSection";
 import { buildMetadata } from "@/lib/metadata";
@@ -22,9 +23,10 @@ export const metadata = buildMetadata({
 });
 
 export default async function Home() {
-  const [events, announcements] = await Promise.all([
+  const [events, announcements, settings] = await Promise.all([
     prisma.event.findMany(),
     prisma.announcement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
+    prisma.settings.get(),
   ]);
 
   const partyCards: PartyEventCardData[] = events
@@ -68,6 +70,7 @@ export default async function Home() {
       <HomeScheduleSection />
       <HomePriceSection />
       <HomeReviewsSection />
+      <HomeLocationSection phone={settings.phone} hours={settings.hours} />
     </>
   );
 }

@@ -1116,3 +1116,325 @@ body {
     line-height: 1.65;
   }
 }
+
+/* «Где мы находимся» — блок с картой 2ГИС (как на D2 detailing) */
+.studio-location {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--border);
+  background: var(--background);
+}
+
+.studio-location::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 110% 75% at 18% 0%,
+    color-mix(in srgb, var(--accent-500) 8%, var(--surface)) 0%,
+    var(--background) 55%
+  );
+}
+
+.studio-location-bg {
+  display: none;
+}
+
+.studio-location-inner {
+  position: relative;
+  z-index: 1;
+  padding-top: 4.5rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+  .studio-location-inner {
+    padding-top: 7rem;
+    padding-bottom: 6rem;
+  }
+}
+
+.studio-location-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.studio-location-intro {
+  max-width: 28rem;
+}
+
+.studio-location-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.studio-location-line {
+  width: 2.5rem;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--accent-400);
+}
+
+.studio-location-title {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+
+.studio-location-lead {
+  margin: 0 0 2rem;
+  max-width: 24rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.studio-location-divider {
+  height: 1px;
+  margin: 0 0 2rem;
+  background: var(--border);
+}
+
+.studio-location-visual {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 45rem;
+  margin: 0 0 2rem;
+}
+
+.studio-location-frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.studio-location-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.7s ease;
+}
+
+.studio-location-frame:hover img {
+  transform: scale(1.02);
+}
+
+.studio-location-map--desktop {
+  display: none;
+}
+
+.studio-location-map--mobile {
+  display: block;
+}
+
+.studio-location-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 1.25rem));
+}
+
+.studio-location-pin-text {
+  position: relative;
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border-strong);
+  background: color-mix(in srgb, var(--background) 92%, transparent);
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent-300);
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.studio-location-pin-text::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: color-mix(in srgb, var(--background) 92%, transparent);
+}
+
+.studio-location-decor {
+  position: absolute;
+  inset: 0.75rem -0.75rem -0.75rem 0.75rem;
+  z-index: -1;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--accent-400) 35%, transparent);
+  transform: rotate(1.5deg);
+}
+
+.studio-location-details-wrap {
+  max-width: 28rem;
+}
+
+.studio-location-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.studio-location-detail-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-300);
+  opacity: 0.85;
+}
+
+.studio-location-brand {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1.3125rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--foreground);
+}
+
+.studio-location-muted {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.studio-location-muted-sm {
+  margin: 0.35rem 0 0;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--muted-dim);
+}
+
+.studio-location-phone {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+  transition: color 0.2s ease;
+}
+
+.studio-location-phone:hover {
+  color: var(--accent-300);
+}
+
+.studio-location-btn {
+  align-self: flex-start;
+}
+
+@media (min-width: 1024px) {
+  .studio-location-bg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .studio-location-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(64px);
+    background: color-mix(in srgb, var(--accent-400) 12%, transparent);
+  }
+
+  .studio-location-glow--tr {
+    top: 0;
+    right: 0;
+    width: 24rem;
+    height: 24rem;
+  }
+
+  .studio-location-glow--bl {
+    bottom: 0;
+    left: 0;
+    width: 20rem;
+    height: 20rem;
+  }
+
+  .studio-location-grid {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.28fr);
+    column-gap: 4.5rem;
+    row-gap: 0;
+    align-items: start;
+  }
+
+  .studio-location-intro {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .studio-location-details-wrap {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 0;
+  }
+
+  .studio-location-visual {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    max-width: 92%;
+    margin: 0 0 0 auto;
+    align-self: center;
+  }
+
+  .studio-location-frame {
+    aspect-ratio: 880 / 450;
+    height: auto;
+  }
+
+  .studio-location-map--desktop {
+    display: block;
+  }
+
+  .studio-location-map--mobile {
+    display: none;
+  }
+
+  .studio-location-lead {
+    margin-bottom: 1.75rem;
+  }
+
+  .studio-location-divider {
+    margin-bottom: 1.75rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .studio-location-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+}

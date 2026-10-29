@@ -517,7 +517,7 @@ function seed(): Store {
     settings: {
       schoolName: "Aliento",
       slogan: "Танец, который чувствуется сердцем",
-      phone: "+7 900 123-45-67",
+      phone: "+7 913 270-45-06",
       email: "info@aliento.dance",
       address: "проспект Карла Маркса, 53а",
       hours: "Ежедневно 10:00 — 22:00",
