@@ -7,10 +7,9 @@ export function HomePriceSection() {
   return (
     <section id="price" className="bg-background-elevated py-14 md:py-20">
       <Container>
-        <h2 className="font-display text-2xl text-foreground md:text-3xl">Цена</h2>
-
-        <div className="mx-auto mt-8 max-w-3xl">
-          <p className="mb-5 text-center text-sm text-muted">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-center font-display text-2xl text-foreground md:text-3xl">Цена</h2>
+          <p className="mb-5 mt-2 text-center text-sm text-muted">
             Ориентир по тарифам. Оформление — в переписке после{" "}
             <a href="#book" className="text-accent-300 link-underline">
               сообщения в Telegram или Max
@@ -60,7 +59,7 @@ export function HomePriceSection() {
           </div>
         </div>
 
-        <div className="mt-8 flex justify-center">
+        <div className="mx-auto mt-8 flex max-w-3xl justify-center">
           <MessengerButtons />
         </div>
       </Container>
