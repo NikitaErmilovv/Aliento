@@ -139,12 +139,6 @@ export function PartyEventCard({
             </div>
           </div>
           {!compact && <p className="text-sm leading-relaxed text-muted">{event.description}</p>}
-          {interactivePhotos && photos.length > 0 && (
-            <p className="text-[11px] text-muted-dim">Листайте стрелками на фото или нажмите, чтобы открыть</p>
-          )}
-          {!interactivePhotos && gallery && gallery.length > 1 && (
-            <p className="text-[11px] text-muted-dim">Листайте фото на плашке →</p>
-          )}
           <p className="mt-auto text-xs text-accent-300">Без записи — просто приходите</p>
         </div>
       </article>

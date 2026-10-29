@@ -134,11 +134,6 @@ export function PartyEventGallery({
         </div>
       )}
 
-      {interactive && (
-        <span className="pointer-events-none absolute right-3 top-12 rounded-full border border-white/20 bg-black/40 px-2 py-0.5 text-[10px] text-white/90 backdrop-blur-sm">
-          {visible.length > 1 ? "Листать · открыть" : "Открыть"}
-        </span>
-      )}
     </div>
   );
 }
