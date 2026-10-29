@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { PartyEventGallery } from "@/components/PartyEventGallery";
 import { PartyPhotoLightbox } from "@/components/PartyPhotoLightbox";
-import { getPartyTheme, partyCoverImage, partyGalleryPaths } from "@/lib/party-events";
+import { getPartyTheme, partyCoverImage, partyGalleryPaths, toPartyDate } from "@/lib/party-events";
 import { formatDate, formatTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
@@ -13,7 +13,7 @@ export type PartyEventCardData = {
   number: number;
   title: string;
   description: string;
-  startsAt: Date;
+  startsAt: Date | string;
   place: string;
   imageUrl?: string;
 };
@@ -44,6 +44,7 @@ export function PartyEventCard({
   interactivePhotos?: boolean;
   className?: string;
 }) {
+  const startsAt = toPartyDate(event.startsAt);
   const theme = getPartyTheme(event.number);
   const gallery = partyGalleryPaths(event.number);
   const [singleOk, setSingleOk] = useState(true);
@@ -124,16 +125,16 @@ export function PartyEventCard({
         <div className={cn("flex flex-1 flex-col", compact ? "gap-2 p-4" : "gap-3 p-5")}>
           <div className="flex items-center gap-3">
             <span className="flex w-14 shrink-0 flex-col items-center rounded-xl border border-border-strong bg-accent-500/10 px-2 py-2">
-              <span className="font-display text-xl leading-none text-accent-300">{event.startsAt.getDate()}</span>
+              <span className="font-display text-xl leading-none text-accent-300">{startsAt.getDate()}</span>
               <span className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-dim">
-                {MONTHS_SHORT[event.startsAt.getMonth()]}
+                {MONTHS_SHORT[startsAt.getMonth()]}
               </span>
-              <span className="text-[10px] text-muted-dim">{event.startsAt.getFullYear()}</span>
+              <span className="text-[10px] text-muted-dim">{startsAt.getFullYear()}</span>
             </span>
             <div className="min-w-0 text-xs text-muted-dim">
-              <p>{formatDate(event.startsAt)}</p>
+              <p>{formatDate(startsAt)}</p>
               <p className="mt-1">
-                {formatTime(event.startsAt)} · {event.place}
+                {formatTime(startsAt)} · {event.place}
               </p>
             </div>
           </div>

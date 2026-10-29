@@ -5,7 +5,7 @@ import { Container } from "@/components/Container";
 import { PartyEventsCarousel } from "@/components/PartyEventsCarousel";
 import type { PartyEventCardData } from "@/components/PartyEventCard";
 import { buildMetadata } from "@/lib/metadata";
-import { prisma } from "@/lib/db";
+import { catalogToEventItems, toPartyDate } from "@/lib/party-events";
 
 export const metadata = buildMetadata({
   title: "Вечеринки",
@@ -14,28 +14,24 @@ export const metadata = buildMetadata({
   path: "/events",
 });
 
-function toPartyCards(
-  events: Awaited<ReturnType<typeof prisma.event.findMany>>
-): PartyEventCardData[] {
-  return events
-    .filter((e): e is typeof e & { number: number } => e.number !== undefined)
+function loadPartyCards(): PartyEventCardData[] {
+  return catalogToEventItems()
     .map((event) => ({
       id: event.id,
       number: event.number,
       title: event.title,
       description: event.description,
-      startsAt: event.startsAt,
+      startsAt: new Date(event.startsAt),
       place: event.place,
       imageUrl: event.imageUrl,
     }))
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+    .sort((a, b) => toPartyDate(a.startsAt).getTime() - toPartyDate(b.startsAt).getTime());
 }
 
 export default async function EventsPage() {
-  const events = await prisma.event.findMany();
-  const parties = toPartyCards(events);
+  const parties = loadPartyCards();
   const now = new Date();
-  const upcoming = parties.filter((e) => e.startsAt >= now);
+  const upcoming = parties.filter((e) => toPartyDate(e.startsAt) >= now);
   const featured = upcoming[0] ?? parties[parties.length - 1];
 
   return (
@@ -54,7 +50,7 @@ export default async function EventsPage() {
                 <p className="stat-label">{upcoming.length > 0 ? "Следующая вечеринка" : "Финал сезона"}</p>
                 <p className="mt-2 font-display text-xl text-foreground md:text-2xl">{featured.title}</p>
                 <p className="mt-1 text-sm text-muted">
-                  {featured.startsAt.toLocaleDateString("ru-RU", {
+                  {toPartyDate(featured.startsAt).toLocaleDateString("ru-RU", {
                     day: "numeric",
                     month: "long",
                     year: "numeric",

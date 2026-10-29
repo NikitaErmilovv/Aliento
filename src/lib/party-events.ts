@@ -201,6 +201,10 @@ export function getPartyTheme(number: number): PartyTheme {
   );
 }
 
+export function toPartyDate(value: Date | string): Date {
+  return value instanceof Date ? value : new Date(value);
+}
+
 export function catalogToEventItems() {
   return PARTY_CATALOG.map((item) => {
     const [year, month, day] = item.date.split("-").map(Number);

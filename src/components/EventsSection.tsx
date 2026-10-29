@@ -3,11 +3,12 @@ import { ArrowRight } from "lucide-react";
 import { Container } from "./Container";
 import { PartyEventsCarousel } from "./PartyEventsCarousel";
 import type { PartyEventCardData } from "./PartyEventCard";
+import { toPartyDate } from "@/lib/party-events";
 
 export function EventsSection({ events }: { events: PartyEventCardData[] }) {
   const parties = events
     .filter((e) => e.number !== undefined)
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+    .sort((a, b) => toPartyDate(a.startsAt).getTime() - toPartyDate(b.startsAt).getTime());
 
   return (
     <section className="bg-background py-14 md:py-20">
