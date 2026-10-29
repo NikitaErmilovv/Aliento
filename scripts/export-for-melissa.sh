@@ -68,3 +68,30 @@ rm -rf out .next
 npx next build --webpack
 
 echo "Static export ready in $ROOT/out"
+
+MELISSA_REPO="${MELISSA_REPO:-$ROOT/../Melissa-tech.ru/aliento}"
+if [[ -d "$MELISSA_REPO" ]]; then
+  python3 - "$ROOT/out" "$MELISSA_REPO" << 'PY'
+import shutil, sys
+from pathlib import Path
+
+src, dst = Path(sys.argv[1]), Path(sys.argv[2])
+keep = {"deploy-version.txt", "README.md"}
+for item in list(dst.iterdir()):
+    if item.name in keep:
+        continue
+    if item.is_dir():
+        shutil.rmtree(item)
+    else:
+        item.unlink()
+for item in src.iterdir():
+    target = dst / item.name
+    if item.is_dir():
+        shutil.copytree(item, target)
+    else:
+        shutil.copy2(item, target)
+print(f"Synced static export -> {dst}")
+PY
+  TS="$(TZ=Asia/Novosibirsk date +%Y%m%d-%H%M%S)"
+  printf 'site=aliento\npath=/aliento/\ndeploy=git-push-master\ndeploy-trigger=aliento-export-%s\n' "$TS" > "$MELISSA_REPO/deploy-version.txt"
+fi
