@@ -68,7 +68,7 @@ export default async function Home() {
       <HomeScheduleSection />
       <HomePriceSection />
       <HomeReviewsSection />
-      <HomeLocationSection phone={settings.phone} hours={settings.hours} />
+      <HomeLocationSection hours={settings.hours} />
     </>
   );
 }

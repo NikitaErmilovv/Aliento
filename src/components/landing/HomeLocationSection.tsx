@@ -4,14 +4,16 @@ import {
   locationCopy,
   twoGisStaticMapUrl,
 } from "@/lib/location";
+import { siteConfig } from "@/lib/site";
 
 type Props = {
-  phone: string;
-  hours: string;
+  hours?: string;
 };
 
-export function HomeLocationSection({ phone, hours }: Props) {
+export function HomeLocationSection({ hours }: Props) {
+  const phone = siteConfig.contacts.phone;
   const tel = phone.replace(/[^+\d]/g, "");
+  const schedule = hours?.trim() || siteConfig.contacts.hours;
   const mapDesktop = twoGisStaticMapUrl("880x450");
   const mapMobile = twoGisStaticMapUrl("720x720");
 
@@ -48,7 +50,7 @@ export function HomeLocationSection({ phone, hours }: Props) {
                   <p className="studio-location-brand">ALIENTO</p>
                   <p className="studio-location-muted">{locationCopy.addressLine}</p>
                   <p className="studio-location-muted-sm">{locationCopy.metroHint}</p>
-                  <p className="studio-location-muted-sm">{hours}</p>
+                  <p className="studio-location-muted-sm">{schedule}</p>
                 </div>
                 <div>
                   <span className="studio-location-detail-label">Телефон</span>

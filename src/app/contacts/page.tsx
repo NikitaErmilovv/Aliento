@@ -17,8 +17,14 @@ export const metadata = buildMetadata({
 export default async function ContactsPage() {
   const settings = await prisma.settings.get();
 
+  const publicPhone = siteConfig.contacts.phone;
   const contacts = [
-    { icon: Phone, label: "Телефон", value: settings.phone, href: `tel:${settings.phone.replace(/[^+\d]/g, "")}` },
+    {
+      icon: Phone,
+      label: "Телефон",
+      value: publicPhone,
+      href: `tel:${publicPhone.replace(/[^+\d]/g, "")}`,
+    },
     { icon: Mail, label: "Email", value: settings.email, href: `mailto:${settings.email}` },
     { icon: MapPin, label: "Адрес", value: settings.address },
     { icon: Clock, label: "Часы работы", value: settings.hours },
