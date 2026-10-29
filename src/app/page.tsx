@@ -1,36 +1,33 @@
-import Link from "next/link";
 import Script from "next/script";
-import { ArrowRight } from "lucide-react";
-import { Hero } from "@/components/Hero";
-import { HomeSpotlight } from "@/components/HomeSpotlight";
-import { FeatureRow } from "@/components/FeatureRow";
-import { EventsSection } from "@/components/EventsSection";
-import { PricingCards } from "@/components/PricingCards";
-import { SectionHeading } from "@/components/SectionHeading";
-import { CtaBanner } from "@/components/CtaBanner";
-import { Container } from "@/components/Container";
-import { FaqAccordion } from "@/components/FaqAccordion";
-import { getFaqByCategory } from "@/lib/faq-data";
+import { Benefits } from "@/components/Benefits";
+import { HomeAboutSection } from "@/components/landing/HomeAboutSection";
+import { HomeAnnouncementsSection } from "@/components/landing/HomeAnnouncementsSection";
+import { HomeBookSection } from "@/components/landing/HomeBookSection";
+import { HomeDirectionsSection } from "@/components/landing/HomeDirectionsSection";
+import { HomeHallSection } from "@/components/landing/HomeHallSection";
+import { HomePartiesSection } from "@/components/landing/HomePartiesSection";
+import { HomePriceSection } from "@/components/landing/HomePriceSection";
+import { HomeReviewsSection } from "@/components/landing/HomeReviewsSection";
+import { HomeScheduleSection } from "@/components/landing/HomeScheduleSection";
 import { buildMetadata } from "@/lib/metadata";
-import { faqJsonLd, webPageJsonLd } from "@/lib/json-ld";
-import { productDefinition } from "@/lib/facts-data";
+import { webPageJsonLd } from "@/lib/json-ld";
 import { prisma } from "@/lib/db";
+import type { PartyEventCardData } from "@/components/PartyEventCard";
 
 export const metadata = buildMetadata({
-  title: "Aliento — школа бачаты",
+  title: "Aliento — танцевальное пространство",
   description:
-    "Школа бачаты Aliento: расписание занятий, абонементы, преподаватели и запись на класс. Танец, который чувствуется сердцем.",
+    "Бачата и кизомба в Новосибирске. Приходите на пробное — дальше расскажем про группы, абонементы и вечеринки.",
   path: "",
 });
 
 export default async function Home() {
-  const previewFaq = getFaqByCategory("general").slice(0, 4);
-  const [events, plans] = await Promise.all([
+  const [events, announcements] = await Promise.all([
     prisma.event.findMany(),
-    prisma.plan.findMany(),
+    prisma.announcement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
   ]);
 
-  const partyCards = events
+  const partyCards: PartyEventCardData[] = events
     .filter((e): e is typeof e & { number: number } => e.number !== undefined)
     .map((event) => ({
       id: event.id,
@@ -40,8 +37,7 @@ export default async function Home() {
       startsAt: event.startsAt,
       place: event.place,
       imageUrl: event.imageUrl,
-    }))
-    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+    }));
 
   return (
     <>
@@ -51,72 +47,27 @@ export default async function Home() {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(
             webPageJsonLd({
-              name: "Aliento — школа бачаты",
-              description: productDefinition,
+              name: "Aliento — танцевальное пространство",
+              description:
+                "Бачата и кизомба в Новосибирске. Приходите на пробное — дальше расскажем про группы, абонементы и вечеринки.",
               path: "",
             })
           ),
         }}
       />
-      <Script
-        id="ld-faq-home"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(previewFaq)) }}
-      />
 
-      <Hero />
-      <FeatureRow />
-      <HomeSpotlight />
-      <EventsSection events={partyCards} />
-
-      <section className="bg-background-elevated py-14 md:py-20">
-        <Container>
-          <SectionHeading
-            eyebrow="Абонементы"
-            align="center"
-            title="Стоимость занятий"
-            description="Разовое посещение или абонемент — оплата онлайн, занятия сразу доступны в личном кабинете."
-            className="mx-auto max-w-3xl"
-          />
-          <div className="section-stack mt-8 md:mt-12">
-            <PricingCards plans={plans} />
-          </div>
-          <div className="mt-8 text-center md:mt-10">
-            <Link
-              href="/subscriptions"
-              className="inline-flex items-center gap-1.5 text-sm text-accent-300 link-underline"
-            >
-              Тарифы и оплата
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </Container>
-      </section>
-
-      <section className="bg-background py-14 md:py-20">
-        <Container>
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-center font-display text-2xl md:text-3xl">Частые вопросы</h2>
-            <div className="mt-8">
-              <FaqAccordion items={previewFaq} />
-            </div>
-            <div className="mt-8 text-center">
-              <Link
-                href="/faq"
-                className="inline-flex items-center gap-1.5 text-sm text-accent-300 link-underline"
-              >
-                Все вопросы и ответы
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <CtaBanner
-        secondaryLabel="Расписание вечеринок"
-        secondaryHref="/events"
-      />
+      <HomeBookSection />
+      <HomeAboutSection />
+      <HomeDirectionsSection />
+      <HomeHallSection />
+      <div id="benefits">
+        <Benefits />
+      </div>
+      <HomePartiesSection events={partyCards} />
+      <HomeAnnouncementsSection items={announcements} />
+      <HomeScheduleSection />
+      <HomePriceSection />
+      <HomeReviewsSection />
     </>
   );
 }

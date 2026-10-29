@@ -9,6 +9,7 @@ import {
   CreditCard,
   ExternalLink,
   LayoutDashboard,
+  Megaphone,
   MessageSquare,
   Settings,
   Ticket,
@@ -29,6 +30,7 @@ const ICONS = {
   payments: CreditCard,
   stats: BarChart3,
   messages: MessageSquare,
+  announcements: Megaphone,
   settings: Settings,
 } as const;
 

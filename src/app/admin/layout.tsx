@@ -18,6 +18,7 @@ const adminItems: AdminNavItem[] = [
   { href: "/admin/plans", label: "Абонементы", icon: "plans" },
   { href: "/admin/payments", label: "Платежи", icon: "payments" },
   { href: "/admin/stats", label: "Статистика", icon: "stats" },
+  { href: "/admin/announcements", label: "Анонсы", icon: "announcements" },
   { href: "/admin/messages", label: "Сообщения", icon: "messages" },
   { href: "/admin/settings", label: "Настройки", icon: "settings" },
 ];

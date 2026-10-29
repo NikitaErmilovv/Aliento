@@ -29,7 +29,7 @@ export const siteConfig = {
   contacts: {
     phone: "+7 900 123-45-67",
     email: "info@aliento.dance",
-    address: "Москва, Центр города",
+    address: "проспект Карла Маркса, 53а",
     hours: "Ежедневно 10:00 — 22:00",
   },
   legal: {

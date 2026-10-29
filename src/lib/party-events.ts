@@ -1,3 +1,5 @@
+import { STUDIO_VENUE_LABEL } from "@/lib/messengers";
+
 export type PartyTheme = {
   gradient: string;
   glow: string;
@@ -13,7 +15,7 @@ export type PartyCatalogItem = {
   theme: PartyTheme;
 };
 
-const STUDIO = "Каменская, 74";
+const STUDIO = STUDIO_VENUE_LABEL;
 
 export const PARTY_CATALOG: PartyCatalogItem[] = [
   {

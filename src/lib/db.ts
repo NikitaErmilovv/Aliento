@@ -126,6 +126,13 @@ export type InviteCode = {
   usedBy: string | null;
   usedAt: string | null;
 };
+export type Announcement = {
+  id: string;
+  tag: string;
+  title: string;
+  body: string;
+  createdAt: string;
+};
 export type Settings = {
   schoolName: string;
   slogan: string;
@@ -153,13 +160,40 @@ type Store = {
   events: EventItem[];
   notifications: Notification[];
   inviteCodes: InviteCode[];
+  announcements: Announcement[];
   settings: Settings;
 };
 
 const DEFAULT_VENUES: Venue[] = [
-  { id: "venue-kamenskaya", name: "Каменская, 74", halls: ["Зал 1", "Зал 2", "Зал 3"] },
-  { id: "venue-europa", name: "Красный пр-т, 182, ТЦ Европа", halls: ["Зал 1", "Зал 2", "Зал 3"] },
+  { id: "venue-dekadance", name: "проспект Карла Маркса, 53а", halls: ["Зал 1", "Зал 2", "Зал 3"] },
 ];
+
+function seedAnnouncements(now: Date): Announcement[] {
+  const iso = now.toISOString();
+  return [
+    {
+      id: uid(),
+      tag: "Набор",
+      title: "Кизомба — набор открыт",
+      body: "Среда 19:00–20:30. Если хотите место в группе — напишите заранее.",
+      createdAt: iso,
+    },
+    {
+      id: uid(),
+      tag: "Набор",
+      title: "Бачата Ladies с нуля",
+      body: "Воскресенье 12:00–13:30. Можно зайти с первого занятия.",
+      createdAt: new Date(now.getTime() - 86400000).toISOString(),
+    },
+    {
+      id: uid(),
+      tag: "Сезон",
+      title: "Тематические вечеринки",
+      body: "Даты и образы — в блоке ниже. Действующим ученикам вход обычно свободный.",
+      createdAt: new Date(now.getTime() - 172800000).toISOString(),
+    },
+  ];
+}
 
 function startOfWeekDate(date: Date) {
   const d = new Date(date);
@@ -173,12 +207,12 @@ function startOfWeekDate(date: Date) {
 function seedDemoRentals(now: Date): HallRental[] {
   const weekStart = startOfWeekDate(now);
   const samples = [
-    { dayOffset: 1, venueId: "venue-kamenskaya", hall: "Зал 3", hour: 10, minutes: 120, clientName: "Цукеров Андрей", peopleCount: 2 },
-    { dayOffset: 2, venueId: "venue-kamenskaya", hall: "Зал 2", hour: 14, minutes: 90, clientName: "Лисовская группа", peopleCount: 8 },
-    { dayOffset: 3, venueId: "venue-kamenskaya", hall: "Зал 3", hour: 11, minutes: 60, clientName: "Гасанов Рустам", peopleCount: 6 },
-    { dayOffset: 1, venueId: "venue-europa", hall: "Зал 1", hour: 9, minutes: 90, clientName: "Студия Move", peopleCount: 12 },
-    { dayOffset: 4, venueId: "venue-europa", hall: "Зал 2", hour: 16, minutes: 120, clientName: "Команда Salsa", peopleCount: 10 },
-    { dayOffset: 5, venueId: "venue-europa", hall: "Зал 3", hour: 13, minutes: 60, clientName: "Частная аренда", peopleCount: 4 },
+    { dayOffset: 1, venueId: "venue-dekadance", hall: "Зал 3", hour: 10, minutes: 120, clientName: "Цукеров Андрей", peopleCount: 2 },
+    { dayOffset: 2, venueId: "venue-dekadance", hall: "Зал 2", hour: 14, minutes: 90, clientName: "Лисовская группа", peopleCount: 8 },
+    { dayOffset: 3, venueId: "venue-dekadance", hall: "Зал 3", hour: 11, minutes: 60, clientName: "Гасанов Рустам", peopleCount: 6 },
+    { dayOffset: 1, venueId: "venue-dekadance", hall: "Зал 1", hour: 9, minutes: 90, clientName: "Студия Move", peopleCount: 12 },
+    { dayOffset: 4, venueId: "venue-dekadance", hall: "Зал 2", hour: 16, minutes: 120, clientName: "Команда Salsa", peopleCount: 10 },
+    { dayOffset: 5, venueId: "venue-dekadance", hall: "Зал 3", hour: 13, minutes: 60, clientName: "Частная аренда", peopleCount: 4 },
   ];
   return samples.map((item) => {
     const day = new Date(weekStart);
@@ -342,7 +376,7 @@ function seed(): Store {
         startsAt: start.toISOString(),
         endsAt: end.toISOString(),
         room: item.room,
-        venueId: "venue-kamenskaya",
+        venueId: "venue-dekadance",
         capacity: item.capacity,
         isDemo: true,
       });
@@ -479,12 +513,13 @@ function seed(): Store {
       { id: uid(), userId: demoStudents[3].id, title: "Вечеринка школы", body: "В субботу Bachata Night. Вход для учеников школы свободный.", read: false, createdAt: daysAgo(3, 12), isDemo: true },
     ],
     inviteCodes: [],
+    announcements: seedAnnouncements(now),
     settings: {
       schoolName: "Aliento",
       slogan: "Танец, который чувствуется сердцем",
       phone: "+7 900 123-45-67",
       email: "info@aliento.dance",
-      address: "Москва, Центр города",
+      address: "проспект Карла Маркса, 53а",
       hours: "Ежедневно 10:00 — 22:00",
       cancelHours: 4,
       trialPriceRub: 1500,
@@ -510,6 +545,7 @@ function migrateStore(raw: Partial<Store>): Store {
   }
   if (store.settings.demoMode === undefined) store.settings.demoMode = true;
   if (!store.inviteCodes) store.inviteCodes = [];
+  if (!store.announcements?.length) store.announcements = seedAnnouncements(new Date());
   if (!store.venues?.length) store.venues = DEFAULT_VENUES;
   if (!store.hallRentals) store.hallRentals = seedDemoRentals(new Date());
   for (const item of store.classes ?? []) {
@@ -1284,6 +1320,36 @@ export const prisma = {
       store.settings = { ...store.settings, ...data };
       save(store);
       return store.settings;
+    },
+  },
+  announcement: {
+    async findMany({ orderBy, take }: { orderBy?: { createdAt?: "desc" | "asc" }; take?: number } = {}) {
+      const store = load();
+      let rows = [...store.announcements];
+      if (orderBy?.createdAt === "desc") {
+        rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      } else if (orderBy?.createdAt === "asc") {
+        rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      }
+      if (take) rows = rows.slice(0, take);
+      return rows;
+    },
+    async create({ data }: { data: Omit<Announcement, "id" | "createdAt"> }) {
+      const store = load();
+      const row: Announcement = {
+        ...data,
+        id: uid(),
+        createdAt: new Date().toISOString(),
+      };
+      store.announcements.unshift(row);
+      save(store);
+      return row;
+    },
+    async delete({ where }: { where: { id: string } }) {
+      const store = load();
+      store.announcements = store.announcements.filter((a) => a.id !== where.id);
+      save(store);
+      return { id: where.id };
     },
   },
 };
