@@ -6,6 +6,7 @@ import { HomeSpotlight } from "@/components/HomeSpotlight";
 import { FeatureRow } from "@/components/FeatureRow";
 import { EventsSection } from "@/components/EventsSection";
 import { PricingCards } from "@/components/PricingCards";
+import { SectionHeading } from "@/components/SectionHeading";
 import { CtaBanner } from "@/components/CtaBanner";
 import { Container } from "@/components/Container";
 import { FaqAccordion } from "@/components/FaqAccordion";
@@ -70,11 +71,24 @@ export default async function Home() {
 
       <section className="bg-background-elevated py-14 md:py-20">
         <Container>
-          <div className="app-card mx-auto max-w-3xl">
-            <h2 className="font-display text-xl md:text-2xl">Стоимость занятий</h2>
-            <div className="mt-6">
-              <PricingCards plans={plans} columns={1} />
-            </div>
+          <SectionHeading
+            eyebrow="Абонементы"
+            align="center"
+            title="Стоимость занятий"
+            description="Разовое посещение или абонемент — оплата онлайн, занятия сразу доступны в личном кабинете."
+            className="mx-auto max-w-3xl"
+          />
+          <div className="section-stack mt-8 md:mt-12">
+            <PricingCards plans={plans} />
+          </div>
+          <div className="mt-8 text-center md:mt-10">
+            <Link
+              href="/subscriptions"
+              className="inline-flex items-center gap-1.5 text-sm text-accent-300 link-underline"
+            >
+              Тарифы и оплата
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </Container>
       </section>
