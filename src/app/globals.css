@@ -1160,11 +1160,16 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0;
+  gap: 2rem;
+}
+
+.studio-location-copy {
+  min-width: 0;
+  max-width: 28rem;
 }
 
 .studio-location-intro {
-  max-width: 28rem;
+  min-width: 0;
 }
 
 .studio-location-kicker {
@@ -1184,11 +1189,11 @@ body {
 .studio-location-title {
   margin: 0 0 1.25rem;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-size: clamp(1.75rem, 4vw, 3rem);
   font-weight: 500;
   line-height: 0.95;
   letter-spacing: -0.04em;
-  text-transform: uppercase;
+  text-wrap: balance;
   color: var(--foreground);
 }
 
@@ -1206,12 +1211,17 @@ body {
   background: var(--border);
 }
 
+.studio-location-divider--intro {
+  margin-bottom: 1.75rem;
+}
+
 .studio-location-visual {
   position: relative;
   z-index: 1;
+  min-width: 0;
   width: 100%;
-  max-width: 45rem;
-  margin: 0 0 2rem;
+  max-width: 100%;
+  isolation: isolate;
 }
 
 .studio-location-frame {
@@ -1283,15 +1293,16 @@ body {
 
 .studio-location-decor {
   position: absolute;
-  inset: 0.75rem -0.75rem -0.75rem 0.75rem;
+  inset: 0.5rem -0.5rem -0.5rem 0.5rem;
   z-index: -1;
   border-radius: 0.75rem;
   border: 1px solid color-mix(in srgb, var(--accent-400) 35%, transparent);
-  transform: rotate(1.5deg);
+  transform: rotate(1.2deg);
+  pointer-events: none;
 }
 
 .studio-location-details-wrap {
-  max-width: 28rem;
+  min-width: 0;
 }
 
 .studio-location-details {
@@ -1352,7 +1363,7 @@ body {
   align-self: flex-start;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .studio-location-bg {
     display: block;
     position: absolute;
@@ -1385,34 +1396,28 @@ body {
 
   .studio-location-grid {
     display: grid;
-    grid-template-columns: minmax(16rem, 0.62fr) minmax(0, 1.28fr);
-    column-gap: 4.5rem;
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    column-gap: clamp(2rem, 5vw, 4rem);
     row-gap: 0;
-    align-items: start;
+    align-items: center;
   }
 
-  .studio-location-intro {
+  .studio-location-copy {
     grid-column: 1;
-    grid-row: 1;
-  }
-
-  .studio-location-details-wrap {
-    grid-column: 1;
-    grid-row: 2;
-    margin-top: 0;
+    max-width: 22rem;
   }
 
   .studio-location-visual {
     grid-column: 2;
-    grid-row: 1 / span 2;
-    max-width: 92%;
-    margin: 0 0 0 auto;
+    grid-row: 1;
+    justify-self: stretch;
     align-self: center;
   }
 
   .studio-location-frame {
     aspect-ratio: 880 / 450;
     height: auto;
+    max-height: min(420px, 52vh);
   }
 
   .studio-location-map--desktop {
@@ -1424,15 +1429,15 @@ body {
   }
 
   .studio-location-lead {
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.5rem;
   }
 
-  .studio-location-divider {
-    margin-bottom: 1.75rem;
+  .studio-location-divider--intro {
+    margin-bottom: 1.5rem;
   }
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 899px) {
   .studio-location-btn {
     width: 100%;
     align-self: stretch;

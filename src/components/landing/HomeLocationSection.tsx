@@ -24,20 +24,48 @@ export function HomeLocationSection({ phone, hours }: Props) {
 
       <Container className="studio-location-inner">
         <div className="studio-location-grid">
-          <div className="studio-location-intro">
-            <div className="studio-location-kicker">
-              <span className="studio-location-line" />
-              <span className="label-caps text-accent-300">Локация</span>
+          <div className="studio-location-copy">
+            <div className="studio-location-intro">
+              <div className="studio-location-kicker">
+                <span className="studio-location-line" />
+                <span className="label-caps text-accent-300">Локация</span>
+              </div>
+              <h2 className="studio-location-title">
+                Где мы
+                <br />
+                <span className="text-accent-300">находимся.</span>
+              </h2>
+              <p className="studio-location-lead">
+                Приходите на занятия по записи. Точный адрес и маршрут — в 2ГИС.
+              </p>
+              <div className="studio-location-divider studio-location-divider--intro" aria-hidden />
             </div>
-            <h2 className="studio-location-title">
-              Где мы
-              <br />
-              <span className="text-accent-300">находимся.</span>
-            </h2>
-            <p className="studio-location-lead">
-              Приходите на занятия по записи. Точный адрес и маршрут — в 2ГИС.
-            </p>
-            <div className="studio-location-divider" aria-hidden />
+
+            <div className="studio-location-details-wrap">
+              <div className="studio-location-details">
+                <div>
+                  <span className="studio-location-detail-label">Студия</span>
+                  <p className="studio-location-brand">ALIENTO</p>
+                  <p className="studio-location-muted">{locationCopy.addressLine}</p>
+                  <p className="studio-location-muted-sm">{locationCopy.metroHint}</p>
+                  <p className="studio-location-muted-sm">{hours}</p>
+                </div>
+                <div>
+                  <span className="studio-location-detail-label">Телефон</span>
+                  <a href={`tel:${tel}`} className="studio-location-phone">
+                    {phone}
+                  </a>
+                </div>
+              </div>
+              <a
+                href={ALIENTO_2GIS_FIRM_URL}
+                className="btn btn-primary studio-location-btn"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Как добраться
+              </a>
+            </div>
           </div>
 
           <div className="studio-location-visual">
@@ -64,32 +92,6 @@ export function HomeLocationSection({ phone, hours }: Props) {
               </div>
             </a>
             <div className="studio-location-decor" aria-hidden />
-          </div>
-
-          <div className="studio-location-details-wrap">
-            <div className="studio-location-details">
-              <div>
-                <span className="studio-location-detail-label">Студия</span>
-                <p className="studio-location-brand">ALIENTO</p>
-                <p className="studio-location-muted">{locationCopy.addressLine}</p>
-                <p className="studio-location-muted-sm">{locationCopy.metroHint}</p>
-                <p className="studio-location-muted-sm">{hours}</p>
-              </div>
-              <div>
-                <span className="studio-location-detail-label">Телефон</span>
-                <a href={`tel:${tel}`} className="studio-location-phone">
-                  {phone}
-                </a>
-              </div>
-            </div>
-            <a
-              href={ALIENTO_2GIS_FIRM_URL}
-              className="btn btn-primary studio-location-btn"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Как добраться
-            </a>
           </div>
         </div>
       </Container>
