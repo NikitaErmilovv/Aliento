@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Container } from "@/components/Container";
+import { publicAsset } from "@/lib/site";
 
 const HALL_PHOTO_CAPTION = "Aliento, проспект Карла Маркса";
 
@@ -29,7 +30,7 @@ export function HomeHallSection() {
         <div className="grid overflow-hidden rounded-3xl border border-border bg-surface lg:grid-cols-[1.05fr_0.95fr]">
           <div className="relative min-h-[17rem] sm:min-h-[22rem] lg:min-h-[28rem]">
             <Image
-              src="/images/studio-hall-relax.webp"
+              src={publicAsset("/images/studio-hall-relax.webp")}
               alt="Зона отдыха в студии Aliento"
               fill
               className="object-cover object-center"

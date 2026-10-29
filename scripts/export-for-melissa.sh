@@ -4,6 +4,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 export NEXT_PUBLIC_SITE_URL="${NEXT_PUBLIC_SITE_URL:-https://melissa-tech.ru/aliento}"
+export NEXT_PUBLIC_BASE_PATH="/aliento"
 export ALIENTO_MELISSA_EXPORT=1
 
 # Stash outside src/app so Next does not compile server-action routes.

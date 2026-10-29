@@ -55,4 +55,11 @@ export const siteConfig = {
   themeColor: "#100c09",
 } as const;
 
+/** Public static files (respects /aliento on melissa-tech.ru). */
+export function publicAsset(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  const base = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
+  return `${base}${normalized}`;
+}
+
 export type SiteConfig = typeof siteConfig;

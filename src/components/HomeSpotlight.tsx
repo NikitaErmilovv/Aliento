@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "./Container";
+import { publicAsset } from "@/lib/site";
 
 export function HomeSpotlight() {
   return (
@@ -10,7 +11,7 @@ export function HomeSpotlight() {
         <div className="home-spotlight grid overflow-hidden rounded-3xl border border-border bg-surface lg:grid-cols-[1.05fr_0.95fr]">
           <div className="relative min-h-[17rem] sm:min-h-[22rem] lg:min-h-[28rem]">
             <Image
-              src="/images/home-outdoor-dance.png"
+              src={publicAsset("/images/home-outdoor-dance.png")}
               alt="Пара танцует бачату на набережной в тёплый летний вечер"
               fill
               className="object-cover object-[center_25%]"

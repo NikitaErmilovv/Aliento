@@ -1,4 +1,5 @@
 import { STUDIO_VENUE_LABEL } from "@/lib/messengers";
+import { publicAsset } from "@/lib/site";
 
 export type PartyTheme = {
   gradient: string;
@@ -165,7 +166,7 @@ export const PARTY_CATALOG: PartyCatalogItem[] = [
 ];
 
 export function partyImagePath(number: number) {
-  return `/events/party-${number}.jpg`;
+  return publicAsset(`/events/party-${number}.jpg`);
 }
 
 /** Ordered gallery paths per event (when multiple photos exist). */
@@ -183,7 +184,8 @@ export const PARTY_GALLERIES: Record<number, string[]> = {
 };
 
 export function partyGalleryPaths(number: number) {
-  return PARTY_GALLERIES[number] ?? null;
+  const paths = PARTY_GALLERIES[number];
+  return paths ? paths.map(publicAsset) : null;
 }
 
 export function partyCoverImage(number: number) {
