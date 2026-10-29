@@ -24,7 +24,9 @@ export function HomePriceSection() {
             >
               <div className="min-w-0">
                 <h3 className="font-display text-lg text-foreground md:text-xl">{row.title}</h3>
-                <p className="mt-1 max-w-md text-sm leading-relaxed text-muted">{row.description}</p>
+                {row.description ? (
+                  <p className="mt-1 max-w-md text-sm leading-relaxed text-muted">{row.description}</p>
+                ) : null}
               </div>
               <div className="flex shrink-0 flex-col items-start gap-3 sm:items-end">
                 <p className="font-display text-2xl tabular-nums text-foreground md:text-[1.75rem]">

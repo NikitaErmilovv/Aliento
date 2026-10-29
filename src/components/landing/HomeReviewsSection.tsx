@@ -7,7 +7,18 @@ export function HomeReviewsSection() {
       <Container>
         <div className="max-w-2xl">
           <h2 className="font-display text-2xl text-foreground md:text-3xl">Отзывы</h2>
-          <p className="mt-2 text-sm text-muted">Коротко о занятиях, атмосфере и том, как сюда попадают.</p>
+          <p className="mt-2 text-sm text-muted">
+            Отзывы учеников на{" "}
+            <a
+              href="https://2gis.ru/novosibirsk/firm/70000001116531788/tab/reviews"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent-300 link-underline"
+            >
+              2ГИС
+            </a>
+            .
+          </p>
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">

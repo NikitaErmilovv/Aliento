@@ -1,15 +1,11 @@
 import Image from "next/image";
-import { Send } from "lucide-react";
 import { Container } from "@/components/Container";
 import { MessengerButtons } from "@/components/landing/MessengerButtons";
-import { maxShareUrl, telegramUrl } from "@/lib/messengers";
 
 export function HomeBookSection() {
-  const tg = telegramUrl();
-
   return (
     <section id="book" className="bg-background pb-10 pt-6 md:pb-16 md:pt-10">
-      <Container className="space-y-8">
+      <Container>
         <div className="stage-light relative overflow-hidden rounded-3xl border border-border px-6 py-14 sm:px-10 sm:py-20 md:px-14 md:py-28">
           <Image
             src="/images/community/altai-7.jpg"
@@ -38,46 +34,6 @@ export function HomeBookSection() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <MessengerButtons size="md" className="!flex-row" />
             </div>
-          </div>
-        </div>
-
-        <div className="content-panel text-center">
-          <h2 className="font-display text-2xl">Напишите нам</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted">
-            Подскажем группу под ваш уровень, время и как устроен абонемент. Можно сразу спросить про
-            пробное — оно бесплатное. Отсканируйте QR или откройте мессенджер:
-          </p>
-          <div className="mt-8 flex items-start justify-center gap-8">
-            <a
-              href={tg}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-2"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(tg)}`}
-                alt="QR-код Telegram"
-                width={120}
-                height={120}
-                className="rounded-lg bg-white p-1.5"
-              />
-              <span className="text-xs text-muted">Telegram</span>
-            </a>
-            <div className="flex flex-col items-center gap-2">
-              <a
-                href={maxShareUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-[120px] w-[120px] items-center justify-center rounded-lg border border-border bg-surface-2 p-3 text-center text-[11px] leading-snug text-muted transition-colors hover:border-accent-400 hover:text-foreground"
-              >
-                Открыть Max
-              </a>
-              <span className="text-xs text-muted">Max</span>
-            </div>
-          </div>
-          <div className="mt-8 flex justify-center">
-            <MessengerButtons />
           </div>
         </div>
       </Container>

@@ -14,6 +14,7 @@ import { buildMetadata } from "@/lib/metadata";
 import { webPageJsonLd } from "@/lib/json-ld";
 import { prisma } from "@/lib/db";
 import type { PartyEventCardData } from "@/components/PartyEventCard";
+import { catalogToEventItems } from "@/lib/party-events";
 
 export const metadata = buildMetadata({
   title: "Aliento — танцевальное пространство",
@@ -23,23 +24,20 @@ export const metadata = buildMetadata({
 });
 
 export default async function Home() {
-  const [events, announcements, settings] = await Promise.all([
-    prisma.event.findMany(),
+  const [announcements, settings] = await Promise.all([
     prisma.announcement.findMany({ orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.settings.get(),
   ]);
 
-  const partyCards: PartyEventCardData[] = events
-    .filter((e): e is typeof e & { number: number } => e.number !== undefined)
-    .map((event) => ({
-      id: event.id,
-      number: event.number,
-      title: event.title,
-      description: event.description,
-      startsAt: event.startsAt,
-      place: event.place,
-      imageUrl: event.imageUrl,
-    }));
+  const partyCards: PartyEventCardData[] = catalogToEventItems().map((event) => ({
+    id: event.id,
+    number: event.number,
+    title: event.title,
+    description: event.description,
+    startsAt: new Date(event.startsAt),
+    place: event.place,
+    imageUrl: event.imageUrl,
+  }));
 
   return (
     <>

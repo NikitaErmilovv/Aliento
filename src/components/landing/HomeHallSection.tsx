@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Container } from "@/components/Container";
-import { STUDIO_VENUE_LABEL } from "@/lib/messengers";
+
+const HALL_PHOTO_CAPTION = "Aliento, проспект Карла Маркса";
 
 const hallPoints = [
   {
@@ -28,8 +29,8 @@ export function HomeHallSection() {
         <div className="grid overflow-hidden rounded-3xl border border-border bg-surface lg:grid-cols-[1.05fr_0.95fr]">
           <div className="relative min-h-[17rem] sm:min-h-[22rem] lg:min-h-[28rem]">
             <Image
-              src="/images/studio-hall-dance.webp"
-              alt="Танцевальный зал Aliento во время занятия"
+              src="/images/studio-hall-relax.webp"
+              alt="Зона отдыха в студии Aliento"
               fill
               className="object-cover object-center"
               sizes="(max-width: 1024px) 100vw, 55vw"
@@ -39,7 +40,7 @@ export function HomeHallSection() {
               aria-hidden
             />
             <p className="absolute bottom-4 left-4 rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[11px] tracking-wide text-white backdrop-blur-sm">
-              {STUDIO_VENUE_LABEL}
+              {HALL_PHOTO_CAPTION}
             </p>
           </div>
 
