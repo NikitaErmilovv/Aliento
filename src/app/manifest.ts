@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site";
 
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: siteConfig.fullName,
     short_name: siteConfig.name,
     description: siteConfig.description,
-    start_url: "/",
+    start_url: process.env.ALIENTO_MELISSA_EXPORT === "1" ? "/aliento/" : "/",
     display: "standalone",
     background_color: "#050507",
     theme_color: siteConfig.themeColor,

@@ -19,6 +19,8 @@ import { loadHallGrid } from "@/lib/hall-grids";
 import { isoDate, startOfWeek } from "@/lib/hall-grid";
 import { getCurrentUser } from "@/lib/session";
 
+export const dynamic = "force-static";
+
 export const metadata = buildMetadata({
   title: "Расписание",
   description:
@@ -26,14 +28,9 @@ export const metadata = buildMetadata({
   path: "/schedule",
 });
 
-export default async function SchedulePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ week?: string }>;
-}) {
+export default async function SchedulePage() {
   const user = await getCurrentUser();
-  const { week } = await searchParams;
-  const weekStart = week ? new Date(`${week}T12:00:00`) : startOfWeek(new Date());
+  const weekStart = startOfWeek(new Date());
   const weekStartIso = isoDate(weekStart);
 
   const classes = await prisma.danceClass.findMany({
