@@ -1,6 +1,5 @@
 import { Logo } from "./Logo";
 import { Avatar } from "./Avatar";
-import { ThemeToggle } from "./ThemeToggle";
 import type { PublicUser } from "@/lib/format";
 
 const ROLE_LABEL: Record<string, string> = {
@@ -30,7 +29,6 @@ export function AppTopbar({
           {children}
         </div>
         <div className="flex items-center gap-3">
-          <ThemeToggle />
           <div className="hidden text-right sm:block">
             <p className="text-sm text-foreground">{user.name}</p>
             <p className="text-xs text-muted-dim">{ROLE_LABEL[user.role] ?? user.role}</p>

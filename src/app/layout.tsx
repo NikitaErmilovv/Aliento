@@ -129,7 +129,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Script id="theme-init" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('aliento-theme');if(t==='light'){document.documentElement.classList.add('light');document.documentElement.style.colorScheme='light';}}catch(e){}})();`}
+          {`(function(){try{document.documentElement.classList.remove('light');document.documentElement.style.colorScheme='dark';localStorage.removeItem('aliento-theme');}catch(e){}})();`}
         </Script>
         <Script
           id="ld-organization"

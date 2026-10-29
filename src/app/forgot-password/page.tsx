@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { requestPasswordResetAction } from "@/actions/auth";
 import { SubmitButton } from "@/components/ButtonLink";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/Logo";
 import { buildMetadata } from "@/lib/metadata";
 
@@ -20,10 +19,6 @@ export default async function ForgotPasswordPage({
 
   return (
     <main className="stage-light flex flex-1 items-center justify-center px-4 py-14">
-      <div className="absolute right-4 top-4 flex items-center gap-2">
-        <ThemeToggle />
-      </div>
-
       <div className="w-full max-w-md">
         <div className="flex justify-center">
           <Logo size="lg" />

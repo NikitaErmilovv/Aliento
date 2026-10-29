@@ -2,14 +2,14 @@ import { Container } from "@/components/Container";
 import { MessengerButtons } from "@/components/landing/MessengerButtons";
 import { homeScheduleRows } from "@/lib/landing-content";
 
-export function HomeScheduleSection() {
+export function HomeScheduleSection({ bookHref = "#book" }: { bookHref?: string }) {
   return (
     <section id="schedule" className="bg-background py-14 md:py-20">
       <Container>
         <h2 className="font-display text-2xl text-foreground md:text-3xl">Расписание</h2>
         <p className="mt-2 max-w-2xl text-sm text-muted">
           Актуальные группы и время. Чтобы попасть —{" "}
-          <a href="#book" className="text-accent-300 link-underline">
+          <a href={bookHref} className="text-accent-300 link-underline">
             напишите нам
           </a>
           .

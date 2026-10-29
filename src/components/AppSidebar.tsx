@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logoutAction } from "@/actions/auth";
-import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/cn";
 import type { PublicUser } from "@/lib/format";
 
@@ -20,12 +19,9 @@ export function AppSidebar({
 
   return (
     <aside className="border-b border-border bg-background-elevated lg:w-64 lg:shrink-0 lg:border-b-0 lg:border-r">
-      <div className="flex items-center justify-between gap-3 px-5 py-5">
-        <div>
-          <p className="font-display text-lg text-foreground">{title}</p>
-          <p className="mt-1 text-xs text-muted">{user.name}</p>
-        </div>
-        <ThemeToggle />
+      <div className="px-5 py-5">
+        <p className="font-display text-lg text-foreground">{title}</p>
+        <p className="mt-1 text-xs text-muted">{user.name}</p>
       </div>
       <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:px-3 lg:pb-6">
         {items.map((item) => {

@@ -3,7 +3,7 @@ import { MessengerButtons } from "@/components/landing/MessengerButtons";
 import { homePriceRows } from "@/lib/landing-content";
 import { trialMaxUrl, trialTelegramUrl } from "@/lib/messengers";
 
-export function HomePriceSection() {
+export function HomePriceSection({ bookHref = "#book" }: { bookHref?: string }) {
   return (
     <section id="price" className="bg-background-elevated py-14 md:py-20">
       <Container>
@@ -11,7 +11,7 @@ export function HomePriceSection() {
           <h2 className="text-center font-display text-2xl text-foreground md:text-3xl">Цена</h2>
           <p className="mb-5 mt-2 text-center text-sm text-muted">
             Ориентир по тарифам. Оформление — в переписке после{" "}
-            <a href="#book" className="text-accent-300 link-underline">
+            <a href={bookHref} className="text-accent-300 link-underline">
               сообщения в Telegram или Max
             </a>
             .

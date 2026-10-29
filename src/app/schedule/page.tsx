@@ -6,7 +6,6 @@ import { PageHeader } from "@/components/PageHeader";
 import { BookButton } from "@/components/BookButton";
 import { CtaBanner } from "@/components/CtaBanner";
 import { Container } from "@/components/Container";
-import { ScheduleTabs } from "@/components/ScheduleTabs";
 import { ButtonLink } from "@/components/ButtonLink";
 import { HallGridSection } from "@/components/HallHallsClient";
 import { HallLegend } from "@/components/HallLegend";
@@ -15,7 +14,7 @@ import { buildMetadata } from "@/lib/metadata";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
 import { prisma } from "@/lib/db";
 import { formatDate, formatTime } from "@/lib/format";
-import { buildScheduleDays } from "@/lib/schedule";
+import { filterClassesWithinDays } from "@/lib/schedule";
 import { loadHallGrid } from "@/lib/hall-grids";
 import { isoDate, startOfWeek } from "@/lib/hall-grid";
 import { getCurrentUser } from "@/lib/session";
@@ -23,7 +22,7 @@ import { getCurrentUser } from "@/lib/session";
 export const metadata = buildMetadata({
   title: "Расписание",
   description:
-    "Расписание школы бачаты Aliento: занятость зала по дням, занятия по дням недели и запись на класс.",
+    "Расписание школы бачаты Aliento: занятость зала по дням и ближайшие занятия на три дня.",
   path: "/schedule",
 });
 
@@ -44,7 +43,7 @@ export default async function SchedulePage({
       bookings: { where: { status: "BOOKED" } },
     },
   });
-  const days = buildScheduleDays(classes);
+  const upcomingClasses = filterClassesWithinDays(classes, 3);
   const hallGrid = await loadHallGrid(weekStart, { hidePeopleCount: true });
 
   return (
@@ -65,10 +64,10 @@ export default async function SchedulePage({
       <PageHeader
         eyebrow="Расписание"
         title="Занятость зала и занятия"
-        description="Сверху — календарь зала по дням: когда идут занятия школы, когда зал сдан, когда свободен. Ниже — привычное расписание классов и запись."
+        description="Сверху — календарь зала по дням: когда идут занятия школы, когда зал сдан, когда свободен. Ниже — ближайшие занятия на три дня и запись."
       >
         <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-          <ButtonLink href="/subscriptions">Купить абонемент</ButtonLink>
+          <ButtonLink href="/subscriptions">Абонементы</ButtonLink>
           <ButtonLink href="/teachers" variant="secondary">
             Преподаватели
           </ButtonLink>
@@ -102,66 +101,59 @@ export default async function SchedulePage({
           </div>
 
           <div className="app-card">
-            <h2 className="font-display text-xl md:text-2xl">Занятия по дням недели</h2>
-            <p className="mt-2 text-sm text-muted">Постоянная сетка классов — выберите день и запишитесь.</p>
-            <div className="mt-6">
-              <ScheduleTabs days={days} />
-            </div>
-          </div>
-
-          <div className="app-card">
             <h2 className="font-display text-xl md:text-2xl">Ближайшие занятия</h2>
+            <p className="mt-2 text-sm text-muted">Следующие три дня — запись из личного кабинета.</p>
             <div className="mt-6 overflow-x-auto">
-              <table className="data-table min-w-[720px]">
-                <thead>
-                  <tr>
-                    <th>Дата</th>
-                    <th>Время</th>
-                    <th>Занятие</th>
-                    <th>Уровень</th>
-                    <th>Мест</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {classes.map((item) => {
-                    const taken = item.bookings.length;
-                    const already = user ? item.bookings.some((b) => b.userId === user.id) : false;
-                    return (
-                      <tr key={item.id}>
-                        <td>{formatDate(item.startsAt)}</td>
-                        <td className="text-accent-300">{formatTime(item.startsAt)}</td>
-                        <td>
-                          <p className="font-medium text-foreground">{item.title}</p>
-                          <p className="text-xs text-muted-dim">{item.teacher.user.name}</p>
-                        </td>
-                        <td>{item.level}</td>
-                        <td>
-                          {taken}/{item.capacity}
-                        </td>
-                        <td>
-                          {!user ? (
-                            <a href="/login" className="text-sm text-accent-300 link-underline">
-                              Войти для записи
-                            </a>
-                          ) : (
-                            <BookButton
-                              classId={item.id}
-                              disabledReason={
-                                already
-                                  ? "Вы уже записаны"
-                                  : taken >= item.capacity
-                                    ? "Мест нет"
-                                    : undefined
-                              }
-                            />
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              {upcomingClasses.length === 0 ? (
+                <p className="text-sm text-muted">В ближайшие три дня занятий в расписании нет.</p>
+              ) : (
+                <table className="data-table min-w-[640px]">
+                  <thead>
+                    <tr>
+                      <th>Дата</th>
+                      <th>Время</th>
+                      <th>Занятие</th>
+                      <th>Уровень</th>
+                      <th />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {upcomingClasses.map((item) => {
+                      const taken = item.bookings.length;
+                      const already = user ? item.bookings.some((b) => b.userId === user.id) : false;
+                      return (
+                        <tr key={item.id}>
+                          <td>{formatDate(item.startsAt)}</td>
+                          <td className="text-accent-300">{formatTime(item.startsAt)}</td>
+                          <td>
+                            <p className="font-medium text-foreground">{item.title}</p>
+                            <p className="text-xs text-muted-dim">{item.teacher.user.name}</p>
+                          </td>
+                          <td>{item.level}</td>
+                          <td>
+                            {!user ? (
+                              <a href="/login" className="text-sm text-accent-300 link-underline">
+                                Войти для записи
+                              </a>
+                            ) : (
+                              <BookButton
+                                classId={item.id}
+                                disabledReason={
+                                  already
+                                    ? "Вы уже записаны"
+                                    : taken >= item.capacity
+                                      ? "Мест нет"
+                                      : undefined
+                                }
+                              />
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </Container>

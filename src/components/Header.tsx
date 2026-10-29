@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
-import { ThemeToggle } from "./ThemeToggle";
 import { ButtonLink } from "./ButtonLink";
 import { cn } from "@/lib/cn";
 import type { PublicUser } from "@/lib/format";
@@ -59,7 +58,6 @@ export function Header({ user }: { user: PublicUser | null }) {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <ThemeToggle />
           {user ? (
             <ButtonLink href={accountHref} size="sm">
               {isStaff(user.role) ? "Панель" : "Кабинет"}
@@ -77,7 +75,6 @@ export function Header({ user }: { user: PublicUser | null }) {
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
-          <ThemeToggle />
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}

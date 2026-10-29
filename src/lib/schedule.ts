@@ -53,6 +53,17 @@ export function buildEventScheduleDays(
  * Collapses the recurring class grid into a single week: repeated occurrences of
  * the same slot (time + title + room) show up once per weekday.
  */
+export function filterClassesWithinDays<T extends { startsAt: Date }>(classes: T[], dayCount: number): T[] {
+  const now = new Date();
+  const end = new Date(now);
+  end.setDate(end.getDate() + dayCount);
+  end.setHours(23, 59, 59, 999);
+
+  return [...classes]
+    .filter((item) => item.startsAt >= now && item.startsAt <= end)
+    .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+}
+
 export function buildScheduleDays(classes: ClassLike[]): ScheduleDay[] {
   return WEEK.map((day) => {
     const seen = new Set<string>();
