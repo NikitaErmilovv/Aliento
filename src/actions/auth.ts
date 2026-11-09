@@ -48,8 +48,6 @@ export async function registerAction(formData: FormData) {
   const email = emailOf(formData);
   const phoneRaw = String(formData.get("phone") || "").trim();
   const password = String(formData.get("password") || "");
-  const inviteRaw = String(formData.get("inviteCode") || "").trim();
-
   const dateOfBirth = normalizeDateOfBirth(dateOfBirthRaw);
   const phone = normalizePhone(phoneRaw);
 
@@ -82,29 +80,6 @@ export async function registerAction(formData: FormData) {
     isDemo: false,
     emailVerified: false,
   };
-
-  if (inviteRaw) {
-    const invite = await prisma.inviteCode.findUnique({ where: { code: inviteRaw } });
-    if (!invite || invite.usedBy) {
-      redirectWithQuery("/register", {
-        error: "Неверный или уже использованный ключ регистрации.",
-      });
-    }
-    const user = await prisma.user.create({ data: userData });
-    await prisma.inviteCode.update({
-      where: { id: invite.id },
-      data: { usedBy: user.id, usedAt: new Date().toISOString() },
-    });
-    try {
-      await issueVerification(user);
-    } catch (error) {
-      console.error("[register] email send failed:", error);
-      redirectWithQuery("/register", {
-        error: "Не удалось отправить письмо. Проверьте email или попробуйте позже.",
-      });
-    }
-    redirectWithQuery("/register/check-email", { email });
-  }
 
   const user = await prisma.user.create({ data: userData });
 

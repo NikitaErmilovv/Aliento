@@ -72,22 +72,6 @@ export default async function RegisterPage({
               <input id="email" name="email" type="email" required autoComplete="email" className="field" />
             </div>
             <div>
-              <label className="field-label" htmlFor="inviteCode">
-                Ключ регистрации
-              </label>
-              <input
-                id="inviteCode"
-                name="inviteCode"
-                autoComplete="off"
-                placeholder="Необязательно"
-                className="field"
-              />
-              <p className="mt-2 text-xs text-muted-dim">
-                Если администратор выдал вам ключ — введите его здесь. Можно зарегистрироваться и без
-                ключа.
-              </p>
-            </div>
-            <div>
               <label className="field-label" htmlFor="password">
                 Пароль
               </label>

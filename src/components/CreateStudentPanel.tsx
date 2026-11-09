@@ -1,13 +1,17 @@
+"use client";
+
 import { SubmitButton } from "@/components/ButtonLink";
 import { createStudentByAdminAction } from "@/actions/admin";
+import { MaskedBirthDateInput } from "@/components/MaskedBirthDateInput";
+import { MaskedPhoneInput } from "@/components/MaskedPhoneInput";
 
 export function CreateStudentPanel() {
   return (
     <section className="app-card">
       <h2 className="app-card-title">Создать ученика</h2>
       <p className="mt-2 text-sm text-muted">
-        Логин и пароль сгенерируются автоматически (email можно не указывать). Передайте их ученику для
-        входа в личный кабинет.
+        Логин и пароль сгенерируются автоматически (email можно не указывать). Ученик сразу сможет войти
+        в личный кабинет с этими данными.
       </p>
       <form action={createStudentByAdminAction} className="mt-6 grid gap-4 md:grid-cols-2">
         <div className="md:col-span-2">
@@ -20,20 +24,13 @@ export function CreateStudentPanel() {
           <label className="field-label" htmlFor="studentPhone">
             Телефон
           </label>
-          <input
-            id="studentPhone"
-            name="phone"
-            type="tel"
-            required
-            className="field"
-            placeholder="+7 900 000-00-00"
-          />
+          <MaskedPhoneInput id="studentPhone" name="phone" required />
         </div>
         <div>
           <label className="field-label" htmlFor="studentDob">
-            Дата рождения
+            Дата рождения <span className="text-muted">(необязательно)</span>
           </label>
-          <input id="studentDob" name="dateOfBirth" type="date" required className="field" />
+          <MaskedBirthDateInput id="studentDob" name="dateOfBirth" />
         </div>
         <div className="md:col-span-2">
           <label className="field-label" htmlFor="studentEmail">

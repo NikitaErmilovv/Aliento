@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db";
 import { requireStaff } from "@/actions/auth";
 import { isAdmin } from "@/lib/format";
 import { randomBytes } from "node:crypto";
-import { hashPassword } from "@/lib/db";
+import { hashPassword, verifyPassword } from "@/lib/db";
 import { isValidDateOfBirth, normalizeDateOfBirth } from "@/lib/birthdays";
 import { isValidRuPhone, normalizePhone } from "@/lib/phone";
 import {
@@ -23,16 +23,12 @@ export async function toggleDemoModeAction(enabled: boolean) {
   return { ok: true };
 }
 
-function makeInviteCode() {
-  return randomBytes(4).toString("hex").toUpperCase();
-}
-
 function makeStudentLoginEmail() {
   return `uch-${randomBytes(4).toString("hex")}@aliento.test`;
 }
 
 function makeStudentPassword() {
-  return randomBytes(5).toString("base64url").slice(0, 10);
+  return randomBytes(5).toString("hex");
 }
 
 export async function createStudentByAdminAction(formData: FormData) {
@@ -46,13 +42,17 @@ export async function createStudentByAdminAction(formData: FormData) {
     .trim()
     .toLowerCase();
 
-  if (!name || !phoneRaw || !dateOfBirthRaw) {
-    redirect("/admin/students?error=Укажите имя, телефон и дату рождения.");
+  if (!name || !phoneRaw) {
+    redirect("/admin/students?error=Укажите имя и телефон.");
   }
 
-  const dateOfBirth = normalizeDateOfBirth(dateOfBirthRaw);
-  if (!dateOfBirth || !isValidDateOfBirth(dateOfBirth)) {
-    redirect("/admin/students?error=Укажите корректную дату рождения (ДД.ММ.ГГГГ).");
+  let dateOfBirth: string | undefined;
+  if (dateOfBirthRaw) {
+    const normalized = normalizeDateOfBirth(dateOfBirthRaw);
+    if (!normalized || !isValidDateOfBirth(normalized)) {
+      redirect("/admin/students?error=Некорректная дата рождения (ДД.ММ.ГГГГ или ГГГГ-ММ-ДД).");
+    }
+    dateOfBirth = normalized;
   }
 
   if (!isValidRuPhone(phoneRaw)) {
@@ -67,13 +67,18 @@ export async function createStudentByAdminAction(formData: FormData) {
 
   const plainPassword = makeStudentPassword();
 
+  const passwordHash = hashPassword(plainPassword);
+  if (!verifyPassword(plainPassword, passwordHash)) {
+    redirect("/admin/students?error=Не удалось сохранить пароль. Попробуйте ещё раз.");
+  }
+
   const user = await prisma.user.create({
     data: {
       name,
       email,
       phone,
-      dateOfBirth,
-      passwordHash: hashPassword(plainPassword),
+      ...(dateOfBirth ? { dateOfBirth } : {}),
+      passwordHash,
       role: "STUDENT",
       blocked: false,
       isDemo: false,
@@ -88,20 +93,6 @@ export async function createStudentByAdminAction(formData: FormData) {
     pass: plainPassword,
   });
   redirect(`/admin/students/${user.id}?${q.toString()}`);
-}
-
-export async function generateInviteCodeAction() {
-  const staff = await requireStaff();
-  if (!isAdmin(staff.role)) return { error: "Недостаточно прав." };
-  let code = makeInviteCode();
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const exists = await prisma.inviteCode.findUnique({ where: { code } });
-    if (!exists) break;
-    code = makeInviteCode();
-  }
-  const row = await prisma.inviteCode.create({ data: { code } });
-  revalidatePath("/admin/students");
-  return { ok: true, code: row.code };
 }
 
 export async function grantTeacherRoleAction(formData: FormData) {

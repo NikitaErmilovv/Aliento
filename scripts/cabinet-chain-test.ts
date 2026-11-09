@@ -117,9 +117,6 @@ async function main() {
   });
   assert(subAfter?.remainingClasses === 3, `Expected 3 classes left, got ${subAfter?.remainingClasses}`);
 
-  const invite = await prisma.inviteCode.create({ data: { code: "TESTINV1" } });
-  assert(invite.code === "TESTINV1", "Invite code not created");
-
   const students = await prisma.user.findMany({ where: { role: "STUDENT" } });
   assert(students.length === 1, `Expected 1 student, got ${students.length}`);
 
@@ -128,7 +125,6 @@ async function main() {
   console.log("  ✓ plan + subscription (admin flow)");
   console.log("  ✓ class + booking (student)");
   console.log("  ✓ attendance → списание абонемента (3/4 осталось)");
-  console.log("  ✓ invite code (доступ к регистрации)");
   console.log(`\nSmoke student id: ${student.id}, class id: ${danceClass.id}`);
 }
 

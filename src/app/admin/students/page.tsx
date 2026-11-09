@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { CreateStudentPanel } from "@/components/CreateStudentPanel";
-import { InviteCodesPanel } from "@/components/InviteCodesPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { UpcomingBirthdaysPanel } from "@/components/UpcomingBirthdaysPanel";
 import { requireStaff } from "@/actions/auth";
@@ -36,8 +35,6 @@ export default async function AdminStudentsPage({
       )
     : all;
 
-  const inviteCodes = staffIsAdmin ? await prisma.inviteCode.findMany() : [];
-
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -48,7 +45,6 @@ export default async function AdminStudentsPage({
       {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
 
       {staffIsAdmin && <CreateStudentPanel />}
-      {staffIsAdmin && <InviteCodesPanel codes={inviteCodes} />}
 
       <UpcomingBirthdaysPanel birthdays={upcomingBirthdays} />
 
