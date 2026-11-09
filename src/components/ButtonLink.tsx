@@ -47,14 +47,16 @@ export function SubmitButton({
   variant = "primary",
   size = "md",
   className,
+  disabled,
 }: {
   children: React.ReactNode;
   variant?: Variant;
   size?: Size;
   className?: string;
+  disabled?: boolean;
 }) {
   return (
-    <button type="submit" className={classes(variant, size, className)}>
+    <button type="submit" disabled={disabled} className={classes(variant, size, className)}>
       {children}
     </button>
   );

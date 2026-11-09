@@ -13,6 +13,7 @@ import {
   buildRecurringClassStarts,
   DEFAULT_RECURRING_WEEKS,
 } from "@/lib/recurring-classes";
+import { setIssuedStudentCredentials } from "@/lib/student-issue-flash";
 
 export async function toggleDemoModeAction(enabled: boolean) {
   const staff = await requireStaff();
@@ -86,13 +87,11 @@ export async function createStudentByAdminAction(formData: FormData) {
     },
   });
 
+  await setIssuedStudentCredentials(user.id, { login: email, pass: plainPassword });
+
   revalidatePath("/admin/students");
-  const q = new URLSearchParams({
-    issued: "1",
-    login: email,
-    pass: plainPassword,
-  });
-  redirect(`/admin/students/${user.id}?${q.toString()}`);
+  revalidatePath(`/admin/students/${user.id}`);
+  redirect(`/admin/students/${user.id}?issued=1`);
 }
 
 export async function grantTeacherRoleAction(formData: FormData) {

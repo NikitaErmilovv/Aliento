@@ -1,9 +1,18 @@
 "use client";
 
+import { useFormStatus } from "react-dom";
 import { SubmitButton } from "@/components/ButtonLink";
 import { createStudentByAdminAction } from "@/actions/admin";
 import { MaskedBirthDateInput } from "@/components/MaskedBirthDateInput";
 import { MaskedPhoneInput } from "@/components/MaskedPhoneInput";
+import { isValidRuPhone } from "@/lib/phone";
+
+function CreateStudentSubmit() {
+  const { pending } = useFormStatus();
+  return (
+    <SubmitButton disabled={pending}>{pending ? "Создаём ученика…" : "Создать ученика"}</SubmitButton>
+  );
+}
 
 export function CreateStudentPanel() {
   return (
@@ -13,7 +22,18 @@ export function CreateStudentPanel() {
         Логин и пароль сгенерируются автоматически (email можно не указывать). Ученик сразу сможет войти
         в личный кабинет с этими данными.
       </p>
-      <form action={createStudentByAdminAction} className="mt-6 grid gap-4 md:grid-cols-2">
+      <form
+        action={createStudentByAdminAction}
+        className="mt-6 grid gap-4 md:grid-cols-2"
+        onSubmit={(event) => {
+          const form = event.currentTarget;
+          const phone = new FormData(form).get("phone");
+          if (typeof phone !== "string" || !isValidRuPhone(phone)) {
+            event.preventDefault();
+            window.alert("Введите полный номер телефона: +7 (XXX) XXX-XX-XX");
+          }
+        }}
+      >
         <div className="md:col-span-2">
           <label className="field-label" htmlFor="studentName">
             Имя и фамилия
@@ -45,7 +65,7 @@ export function CreateStudentPanel() {
           />
         </div>
         <div className="md:col-span-2">
-          <SubmitButton>Создать ученика</SubmitButton>
+          <CreateStudentSubmit />
         </div>
       </form>
     </section>

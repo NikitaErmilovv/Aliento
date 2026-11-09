@@ -55,9 +55,6 @@ export function MaskedPhoneInput({
       onFocus={() => {
         if (!digits) setDigits("7");
       }}
-      onBlur={() => {
-        if (digits === "7") setDigits("");
-      }}
       required={required}
       className={className}
     />

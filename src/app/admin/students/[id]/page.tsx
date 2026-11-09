@@ -15,19 +15,22 @@ import {
   isAdmin,
 } from "@/lib/format";
 import { formatBirthdayFull, ageOnNextBirthday } from "@/lib/birthdays";
+import { takeIssuedStudentCredentials } from "@/lib/student-issue-flash";
 
 export default async function AdminStudentProfile({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; granted?: string; issued?: string; login?: string; pass?: string }>;
+  searchParams: Promise<{ error?: string; granted?: string; issued?: string }>;
 }) {
   const staff = await requireStaff();
   const staffIsAdmin = isAdmin(staff.role);
 
   const { id } = await params;
-  const { error, granted, issued, login, pass } = await searchParams;
+  const { error, granted, issued } = await searchParams;
+  const issuedCreds =
+    staffIsAdmin && issued === "1" ? await takeIssuedStudentCredentials(id) : null;
   const plans = staffIsAdmin ? await prisma.plan.findMany() : [];
   const student = await prisma.user.findUnique({ where: { id } });
   if (!student || student.role !== "STUDENT") {
@@ -46,21 +49,30 @@ export default async function AdminStudentProfile({
     <div className="space-y-5">
       {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
       {granted && <p className="app-card text-sm text-success">Абонемент выдан ученику.</p>}
-      {staffIsAdmin && issued === "1" && login && pass && (
+      {issuedCreds && (
         <section className="app-card border-success/40">
           <h2 className="app-card-title text-success">Ученик создан — данные для входа</h2>
-          <p className="mt-2 text-sm text-muted">Сохраните и передайте ученику. Пароль больше не покажется в интерфейсе.</p>
+          <p className="mt-2 text-sm text-muted">
+            Профиль сохранён. Сохраните и передайте ученику логин и пароль — повторно они здесь не
+            отобразятся.
+          </p>
           <dl className="mt-4 space-y-2 font-mono text-sm">
             <div>
               <dt className="text-xs text-muted-dim">Логин (email)</dt>
-              <dd className="text-foreground">{login}</dd>
+              <dd className="text-foreground">{issuedCreds.login}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-dim">Пароль</dt>
-              <dd className="text-accent-300">{pass}</dd>
+              <dd className="text-accent-300">{issuedCreds.pass}</dd>
             </div>
           </dl>
         </section>
+      )}
+      {staffIsAdmin && issued === "1" && !issuedCreds && (
+        <p className="app-card text-sm text-muted">
+          Ученик создан. Данные для входа уже были показаны ранее — при необходимости сбросьте пароль
+          через «Забыли пароль?» на странице входа.
+        </p>
       )}
 
       <Link href="/admin/students" className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground">
