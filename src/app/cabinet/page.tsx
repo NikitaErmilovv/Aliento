@@ -48,6 +48,7 @@ export default async function CabinetOverview({
     }),
     7
   ).sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
+  const nextClass = upcomingSchedule[0] ?? null;
 
   const recentAttendance = attendances.slice(0, 5);
 
@@ -141,31 +142,30 @@ export default async function CabinetOverview({
         )}
       </section>
 
-      <section className="app-card lg:col-span-2">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="app-card-title">Ближайшие занятия</h2>
-          <Link href="/cabinet/classes" className="text-sm text-accent-300 link-underline">
-            Расписание на 2 недели
-          </Link>
-        </div>
-        <p className="mt-2 text-sm text-muted">Без записи — приходите в зал в указанное время.</p>
-        {upcomingSchedule.length === 0 ? (
-          <p className="card-body mt-5 text-sm">На ближайшую неделю занятий в расписании нет.</p>
+      <section className="app-card">
+        <h2 className="app-card-title">Ближайшее занятие</h2>
+        {nextClass ? (
+          <div className="mt-5">
+            <p className="text-sm text-accent-300">
+              {formatDate(nextClass.startsAt)} · {formatTime(nextClass.startsAt)} —{" "}
+              {formatTime(nextClass.endsAt)}
+            </p>
+            <p className="mt-3 font-display text-lg text-foreground">{nextClass.title}</p>
+            <p className="mt-1.5 text-sm text-muted">
+              {nextClass.room} · {nextClass.teacher.user.name}
+            </p>
+            <p className="mt-3 text-xs text-muted">Запись не нужна — просто приходите в зал.</p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Link href="/cabinet/classes" className="text-sm text-accent-300 link-underline">
+                Всё расписание
+              </Link>
+              <Link href="/schedule" className="text-sm text-muted link-underline">
+                На сайте
+              </Link>
+            </div>
+          </div>
         ) : (
-          <ul className="mt-5 divide-y divide-border">
-            {upcomingSchedule.slice(0, 5).map((item) => (
-              <li key={item.id} className="flex flex-wrap gap-4 py-3">
-                <div className="w-36 shrink-0 text-sm text-accent-300">{formatDate(item.startsAt)}</div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">{item.title}</p>
-                  <p className="mt-0.5 text-xs text-muted">
-                    {formatTime(item.startsAt)} — {formatTime(item.endsAt)} · {item.teacher.user.name} ·{" "}
-                    {item.room}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <p className="card-body mt-5 text-sm">Ближайших занятий пока нет.</p>
         )}
       </section>
 
