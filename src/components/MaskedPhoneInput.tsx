@@ -9,7 +9,7 @@ export function MaskedPhoneInput({
   required,
   className = "field",
   defaultValue,
-  placeholder = "+7 900 000-00-00",
+  placeholder = "+7 (900) 000-00-00",
 }: {
   id?: string;
   name?: string;
@@ -31,6 +31,10 @@ export function MaskedPhoneInput({
     setValue(formatPhoneInput(nextRaw));
   }
 
+  function handleFocus() {
+    if (!value) setValue("+7");
+  }
+
   return (
     <input
       id={id}
@@ -41,6 +45,10 @@ export function MaskedPhoneInput({
       placeholder={placeholder}
       value={value}
       onChange={(event) => handleChange(event.target.value)}
+      onFocus={handleFocus}
+      onBlur={() => {
+        if (value === "+7") setValue("");
+      }}
       required={required}
       className={className}
     />

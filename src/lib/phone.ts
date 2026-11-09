@@ -2,6 +2,7 @@ export function phoneDigits(value: string) {
   return value.replace(/\D/g, "");
 }
 
+/** Russian mobile display: +7 (900) 123-45-67 */
 export function formatPhoneInput(value: string) {
   let digits = phoneDigits(value);
   if (digits.length === 0) return "";
@@ -19,10 +20,14 @@ export function formatPhoneInput(value: string) {
 
   if (local.length === 0) return "+7";
 
-  let out = `+7 ${local.slice(0, 3)}`;
-  if (local.length > 3) out += ` ${local.slice(3, 6)}`;
-  if (local.length > 6) out += `-${local.slice(6, 8)}`;
-  if (local.length > 8) out += `-${local.slice(8, 10)}`;
+  let out = "+7";
+  if (local.length > 0) {
+    out += " (" + local.slice(0, 3);
+    if (local.length >= 3) out += ")";
+  }
+  if (local.length > 3) out += " " + local.slice(3, 6);
+  if (local.length > 6) out += "-" + local.slice(6, 8);
+  if (local.length > 8) out += "-" + local.slice(8, 10);
   return out;
 }
 
