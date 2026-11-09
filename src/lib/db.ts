@@ -236,6 +236,7 @@ function seedDemoRentals(now: Date): HallRental[] {
 
 const dataDir = join(process.cwd(), "data");
 const dataFile = join(dataDir, "aliento.json");
+const initialDataFile = join(dataDir, "aliento.initial.json");
 
 function uid() {
   return randomBytes(12).toString("hex");
@@ -638,6 +639,24 @@ export function seedClean(): Store {
   };
 }
 
+function dropDemoRows<T extends { isDemo?: boolean }>(rows: T[] | undefined): T[] {
+  return (rows ?? []).filter((row) => row.isDemo !== true);
+}
+
+function stripDemoFromStore(store: Store) {
+  store.settings.demoMode = false;
+  store.users = dropDemoRows(store.users);
+  store.teachers = store.teachers.filter((t) => store.users.some((u) => u.id === t.userId));
+  store.classes = dropDemoRows(store.classes);
+  store.bookings = dropDemoRows(store.bookings);
+  store.plans = dropDemoRows(store.plans);
+  store.subscriptions = dropDemoRows(store.subscriptions);
+  store.attendances = dropDemoRows(store.attendances);
+  store.payments = dropDemoRows(store.payments);
+  store.notifications = dropDemoRows(store.notifications);
+  store.hallRentals = dropDemoRows(store.hallRentals);
+}
+
 function migrateStore(raw: Partial<Store>): Store {
   const store = raw as Store;
   if (!store.settings) {
@@ -650,10 +669,11 @@ function migrateStore(raw: Partial<Store>): Store {
       hours: "",
       cancelHours: 4,
       trialPriceRub: 1500,
-      demoMode: true,
+      demoMode: false,
     };
   }
-  if (store.settings.demoMode === undefined) store.settings.demoMode = true;
+  store.settings.demoMode = false;
+  stripDemoFromStore(store);
   if (!store.inviteCodes) store.inviteCodes = [];
   if (store.announcements === undefined) store.announcements = seedAnnouncements(new Date());
   if (!store.venues?.length) store.venues = DEFAULT_VENUES;
@@ -678,41 +698,9 @@ function migrateStore(raw: Partial<Store>): Store {
   }
 
   for (const user of store.users ?? []) {
-    if (user.isDemo === undefined) {
-      user.isDemo = user.role === "STUDENT" && user.email.endsWith("@aliento.test");
-    }
+    if (user.isDemo === undefined) user.isDemo = false;
     if (user.emailVerified === undefined) {
-      user.emailVerified = user.role !== "STUDENT" || user.isDemo === true;
-    }
-  }
-
-  const demoBirthdaySeed: Record<string, [number, number]> = {
-    "anna@aliento.test": [3, 1998],
-    "maria@aliento.test": [0, 2001],
-    "dmitry@aliento.test": [10, 1995],
-    "elena@aliento.test": [-1, 1992],
-    "alexey@aliento.test": [-1, 1989],
-    "olga@aliento.test": [7, 2003],
-  };
-
-  function birthDateFromNow(daysUntilBirthday: number, birthYear: number) {
-    const next = new Date();
-    next.setDate(next.getDate() + daysUntilBirthday);
-    const month = String(next.getMonth() + 1).padStart(2, "0");
-    const day = String(next.getDate()).padStart(2, "0");
-    return `${birthYear}-${month}-${day}`;
-  }
-
-  for (const user of store.users ?? []) {
-    if (user.dateOfBirth || user.role !== "STUDENT") continue;
-    const seed = demoBirthdaySeed[user.email];
-    if (!seed) continue;
-    if (seed[0] >= 0) {
-      user.dateOfBirth = birthDateFromNow(seed[0], seed[1]);
-    } else if (user.email === "elena@aliento.test") {
-      user.dateOfBirth = "1992-06-15";
-    } else if (user.email === "alexey@aliento.test") {
-      user.dateOfBirth = "1989-11-02";
+      user.emailVerified = user.role !== "STUDENT";
     }
   }
 
@@ -723,12 +711,12 @@ function migrateStore(raw: Partial<Store>): Store {
     store.subscriptions,
     store.attendances,
     store.payments,
-    store.events,
     store.notifications,
+    store.hallRentals,
   ]) {
     if (!list) continue;
     for (const item of list) {
-      if (item.isDemo === undefined) item.isDemo = true;
+      if (item.isDemo === undefined) item.isDemo = false;
     }
   }
 
@@ -742,18 +730,25 @@ function demoOn(store: Store) {
 function load(): Store {
   if (!existsSync(dataFile)) {
     mkdirSync(dataDir, { recursive: true });
-    const created =
-      process.env.ALIENTO_INITIAL_SEED === "clean" ? seedClean() : seed();
+    let created: Store;
+    if (existsSync(initialDataFile)) {
+      created = migrateStore(JSON.parse(readFileSync(initialDataFile, "utf8")) as Partial<Store>);
+    } else if (process.env.ALIENTO_INITIAL_SEED === "demo") {
+      created = migrateStore(seed());
+    } else {
+      created = seedClean();
+    }
     writeFileSync(dataFile, JSON.stringify(created, null, 2));
     return created;
   }
   const raw = JSON.parse(readFileSync(dataFile, "utf8")) as Partial<Store>;
+  const store = migrateStore(raw);
   const needsSave =
     !raw.venues?.length ||
-    !raw.hallRentals ||
+    raw.hallRentals === undefined ||
     (raw.classes ?? []).some((c) => !c.venueId) ||
-    !(raw.events ?? []).some((e) => e.id === "party-1");
-  const store = migrateStore(raw);
+    !(raw.events ?? []).some((e) => e.id === "party-1") ||
+    raw.settings?.demoMode !== false;
   if (needsSave) save(store);
   return store;
 }

@@ -1,17 +1,15 @@
-/** Shared demo-mode helpers for the JSON store. */
+/** Legacy `isDemo` flags on records; demo mode toggle removed — always production view. */
 
 export type DemoFlag = { isDemo?: boolean };
 
-export function isDemoMode(settings: { demoMode?: boolean }) {
-  return settings.demoMode !== false;
+export function isDemoMode(_settings: { demoMode?: boolean }) {
+  return false;
 }
 
-export function filterDemo<T extends DemoFlag>(items: T[], demoOn: boolean) {
-  if (demoOn) return items;
+export function filterDemo<T extends DemoFlag>(items: T[], _demoOn: boolean) {
   return items.filter((item) => !item.isDemo);
 }
 
-export function filterStudents(users: { role: string; isDemo?: boolean }[], demoOn: boolean) {
-  if (demoOn) return users.filter((u) => u.role === "STUDENT");
+export function filterStudents(users: { role: string; isDemo?: boolean }[], _demoOn: boolean) {
   return users.filter((u) => u.role === "STUDENT" && !u.isDemo);
 }

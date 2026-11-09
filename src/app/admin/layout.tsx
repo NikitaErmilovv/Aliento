@@ -31,17 +31,12 @@ const teacherItems: AdminNavItem[] = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireStaff();
-  const settings = await prisma.settings.get();
   const staffIsAdmin = isAdmin(user.role);
   const items = staffIsAdmin ? adminItems : teacherItems;
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-background-elevated lg:flex-row">
-      <AdminSidebar
-        items={items}
-        demoMode={settings.demoMode !== false}
-        showDemoToggle={staffIsAdmin}
-      />
+      <AdminSidebar items={items} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AppTopbar user={user} hideLogoOnDesktop />
         <main className="flex-1 px-4 py-8 md:px-8">{children}</main>

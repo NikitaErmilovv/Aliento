@@ -15,7 +15,6 @@ import {
   Ticket,
   Users,
 } from "lucide-react";
-import { DemoModeToggle } from "@/components/DemoModeToggle";
 import { Logo } from "./Logo";
 import { LogoutButton } from "./LogoutButton";
 import { cn } from "@/lib/cn";
@@ -40,15 +39,7 @@ export type AdminNavItem = {
   icon: keyof typeof ICONS;
 };
 
-export function AdminSidebar({
-  items,
-  demoMode = true,
-  showDemoToggle = false,
-}: {
-  items: AdminNavItem[];
-  demoMode?: boolean;
-  showDemoToggle?: boolean;
-}) {
+export function AdminSidebar({ items }: { items: AdminNavItem[] }) {
   const pathname = usePathname();
 
   return (
@@ -56,8 +47,6 @@ export function AdminSidebar({
       <div className="hidden px-5 py-5 lg:block">
         <Logo size="sm" href="/admin" />
       </div>
-
-      {showDemoToggle && <DemoModeToggle demoMode={demoMode} />}
 
       <nav className="flex gap-1 overflow-x-auto px-3 py-3 lg:flex-col lg:overflow-visible lg:py-0">
         {items.map((item) => {

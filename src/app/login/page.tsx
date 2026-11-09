@@ -10,10 +10,11 @@ export const metadata = buildMetadata({
   path: "/login",
 });
 
-const demoAccounts = [
-  { role: "Ученик", email: "anna@aliento.test" },
+const testAccounts = [
+  { role: "Владелец", email: "owner@aliento.test" },
   { role: "Администратор", email: "admin@aliento.test" },
   { role: "Преподаватель", email: "anastasia@aliento.test" },
+  { role: "Ученик (тест)", email: "student@aliento.test" },
 ];
 
 export default async function LoginPage({
@@ -95,9 +96,9 @@ export default async function LoginPage({
         </form>
 
         <div className="app-card mt-4">
-          <p className="stat-label">Демо-доступы · пароль aliento123</p>
+          <p className="stat-label">Тестовые доступы · пароль aliento123</p>
           <ul className="mt-4 space-y-2.5">
-            {demoAccounts.map((account) => (
+            {testAccounts.map((account) => (
               <li key={account.email} className="flex items-center justify-between gap-3 text-sm">
                 <span className="text-muted">{account.role}</span>
                 <span className="text-accent-300">{account.email}</span>

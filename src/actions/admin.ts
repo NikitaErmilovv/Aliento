@@ -20,15 +20,6 @@ import {
   roundHours,
 } from "@/lib/subscription-balance";
 
-export async function toggleDemoModeAction(enabled: boolean) {
-  const staff = await requireStaff();
-  if (!isAdmin(staff.role)) return { error: "Недостаточно прав." };
-  await prisma.settings.update({ data: { demoMode: enabled } });
-  revalidatePath("/admin", "layout");
-  revalidatePath("/");
-  return { ok: true };
-}
-
 function makeStudentLoginEmail() {
   return `uch-${randomBytes(4).toString("hex")}@aliento.test`;
 }
