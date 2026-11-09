@@ -528,6 +528,80 @@ function seed(): Store {
   };
 }
 
+/** Empty operational data; keeps test staff logins (password aliento123). demoMode off. */
+export function seedClean(): Store {
+  const passwordHash = hashPassword("aliento123");
+  const now = new Date().toISOString();
+
+  const staffUser = (
+    name: string,
+    email: string,
+    phone: string,
+    role: string,
+    dateOfBirth?: string
+  ): User => ({
+    id: uid(),
+    name,
+    email,
+    phone,
+    passwordHash,
+    role,
+    blocked: false,
+    isDemo: false,
+    emailVerified: true,
+    createdAt: now,
+    ...(dateOfBirth ? { dateOfBirth } : {}),
+  });
+
+  const owner = staffUser("Владелец Aliento", "owner@aliento.test", "+7 900 000-00-01", "OWNER");
+  const admin = staffUser("Администратор", "admin@aliento.test", "+7 900 000-00-02", "ADMIN");
+  const anastasiaUser = staffUser("Анастасия Ромова", "anastasia@aliento.test", "+7 900 000-00-03", "TEACHER");
+  const alexanderUser = staffUser("Александр Дин", "alexander@aliento.test", "+7 900 000-00-04", "TEACHER");
+  const student = staffUser("Тестовый ученик", "student@aliento.test", "+7 900 111-22-33", "STUDENT", "1998-03-15");
+
+  const anastasia: Teacher = {
+    id: uid(),
+    userId: anastasiaUser.id,
+    title: "Bachata Sensual · Ladies styling",
+    description: "Преподаватель sensual bachata и ladies styling.",
+  };
+  const alexander: Teacher = {
+    id: uid(),
+    userId: alexanderUser.id,
+    title: "Bachata Partnerwork · Практика",
+    description: "Ведение, рамка и практики школы.",
+  };
+
+  return {
+    users: [owner, admin, anastasiaUser, alexanderUser, student],
+    teachers: [anastasia, alexander],
+    venues: DEFAULT_VENUES,
+    hallRentals: [],
+    classes: [],
+    bookings: [],
+    plans: [],
+    subscriptions: [],
+    attendances: [],
+    payments: [],
+    events: catalogToEventItems(),
+    notifications: [],
+    inviteCodes: [],
+    announcements: [],
+    settings: {
+      schoolName: "Aliento",
+      slogan: "Танец, который чувствуется сердцем",
+      phone: "+7 913 270-45-06",
+      email: "info@aliento.dance",
+      address: "проспект Карла Маркса, 53а",
+      hours: "Ежедневно 10:00 — 22:00",
+      cancelHours: 4,
+      trialPriceRub: 1500,
+      demoMode: false,
+      hallActivityTypes: DEFAULT_HALL_ACTIVITY_TYPES,
+    },
+  };
+}
+
 function migrateStore(raw: Partial<Store>): Store {
   const store = raw as Store;
   if (!store.settings) {
@@ -545,9 +619,11 @@ function migrateStore(raw: Partial<Store>): Store {
   }
   if (store.settings.demoMode === undefined) store.settings.demoMode = true;
   if (!store.inviteCodes) store.inviteCodes = [];
-  if (!store.announcements?.length) store.announcements = seedAnnouncements(new Date());
+  if (store.announcements === undefined) store.announcements = seedAnnouncements(new Date());
   if (!store.venues?.length) store.venues = DEFAULT_VENUES;
-  if (!store.hallRentals) store.hallRentals = seedDemoRentals(new Date());
+  if (store.hallRentals === undefined) {
+    store.hallRentals = store.settings.demoMode === false ? [] : seedDemoRentals(new Date());
+  }
   for (const item of store.classes ?? []) {
     if (!item.venueId) item.venueId = store.venues[0]?.id;
   }
@@ -627,7 +703,8 @@ function demoOn(store: Store) {
 function load(): Store {
   if (!existsSync(dataFile)) {
     mkdirSync(dataDir, { recursive: true });
-    const created = seed();
+    const created =
+      process.env.ALIENTO_INITIAL_SEED === "clean" ? seedClean() : seed();
     writeFileSync(dataFile, JSON.stringify(created, null, 2));
     return created;
   }

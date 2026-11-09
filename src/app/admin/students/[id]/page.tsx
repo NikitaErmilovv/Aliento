@@ -4,6 +4,7 @@ import { Avatar } from "@/components/Avatar";
 import { StatusBadge } from "@/components/StatusBadge";
 import { BlockUserButton } from "@/components/BlockUserButton";
 import { SubscriptionAdminActions } from "@/components/SubscriptionAdminActions";
+import { GrantSubscriptionForm } from "@/components/GrantSubscriptionForm";
 import { requireStaff } from "@/actions/auth";
 import { prisma } from "@/lib/db";
 import {
@@ -17,13 +18,17 @@ import { formatBirthdayFull, ageOnNextBirthday } from "@/lib/birthdays";
 
 export default async function AdminStudentProfile({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string; granted?: string }>;
 }) {
   const staff = await requireStaff();
   const staffIsAdmin = isAdmin(staff.role);
 
   const { id } = await params;
+  const { error, granted } = await searchParams;
+  const plans = staffIsAdmin ? await prisma.plan.findMany() : [];
   const student = await prisma.user.findUnique({ where: { id } });
   if (!student || student.role !== "STUDENT") {
     return <p className="app-card card-body text-sm">Ученик не найден.</p>;
@@ -39,6 +44,9 @@ export default async function AdminStudentProfile({
 
   return (
     <div className="space-y-5">
+      {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
+      {granted && <p className="app-card text-sm text-success">Абонемент выдан ученику.</p>}
+
       <Link href="/admin/students" className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
         Все ученики
@@ -98,6 +106,7 @@ export default async function AdminStudentProfile({
       <div className={`grid gap-5 ${staffIsAdmin ? "xl:grid-cols-2" : ""}`}>
         <section className="app-card">
           <h2 className="app-card-title">Абонементы</h2>
+          {staffIsAdmin && <GrantSubscriptionForm studentId={student.id} plans={plans} />}
           <div className="mt-5 overflow-x-auto">
             <table className="data-table min-w-[420px]">
               <thead>

@@ -39,6 +39,7 @@ yarn-error.log*
 
 # local demo database
 /data/aliento.json
+cloudflared
 
 # typescript
 *.tsbuildinfo

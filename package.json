@@ -6,7 +6,9 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "reset:clean": "tsx scripts/reset-clean.ts",
+    "test:chain": "tsx scripts/cabinet-chain-test.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",

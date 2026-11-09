@@ -219,6 +219,55 @@ export async function deletePlanAction(formData: FormData) {
   redirect("/admin/plans?deleted=1");
 }
 
+export async function grantSubscriptionAction(formData: FormData) {
+  const staff = await requireStaff();
+  if (!isAdmin(staff.role)) redirect("/admin/students?error=Недостаточно прав.");
+
+  const studentId = String(formData.get("studentId") || "");
+  const planId = String(formData.get("planId") || "");
+  if (!studentId || !planId) {
+    redirect(`/admin/students/${studentId || ""}?error=Выберите тариф.`);
+  }
+
+  const [student, plan] = await Promise.all([
+    prisma.user.findUnique({ where: { id: studentId } }),
+    prisma.plan.findUnique({ where: { id: planId } }),
+  ]);
+  if (!student || student.role !== "STUDENT") {
+    redirect(`/admin/students?error=Ученик не найден.`);
+  }
+  if (!plan) redirect(`/admin/students/${studentId}?error=Тариф не найден.`);
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
+
+  await prisma.subscription.create({
+    data: {
+      userId: student.id,
+      planId: plan.id,
+      totalClasses: plan.classCount,
+      remainingClasses: plan.classCount,
+      expiresAt,
+      status: "ACTIVE",
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: student.id,
+      title: "Абонемент выдан",
+      body: `Администратор активировал «${plan.name}»: ${plan.classCount} занятий до ${expiresAt.toLocaleDateString("ru-RU")}.`,
+    },
+  });
+
+  revalidatePath("/admin/students");
+  revalidatePath(`/admin/students/${studentId}`);
+  revalidatePath("/admin/plans");
+  revalidatePath("/cabinet");
+  revalidatePath("/cabinet/subscriptions");
+  redirect(`/admin/students/${studentId}?granted=1`);
+}
+
 export async function cancelSubscriptionAction(subscriptionId: string) {
   const staff = await requireStaff();
   if (!isAdmin(staff.role)) return { error: "Недостаточно прав." };
