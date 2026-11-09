@@ -9,7 +9,7 @@ import { getUpcomingBirthdays, formatBirthdayFull } from "@/lib/birthdays";
 import { syncBirthdayAdminNotifications } from "@/lib/birthday-alerts";
 import { formatDate, formatRub, isAdmin } from "@/lib/format";
 import { readNewStudentFlash } from "@/lib/student-issue-flash";
-import { formatHourBalance } from "@/lib/subscription-balance";
+import { StudentListSubscription } from "@/components/StudentListSubscription";
 
 export default async function AdminStudentsPage({
   searchParams,
@@ -97,8 +97,7 @@ export default async function AdminStudentsPage({
               <tr>
                 <th>Имя</th>
                 <th>Контакты</th>
-                <th>Абонемент</th>
-                <th>Остаток (ч)</th>
+                <th>Абонемент · часы</th>
                 {staffIsAdmin && <th>Оплачено</th>}
                 <th className="text-right">Статус</th>
               </tr>
@@ -106,13 +105,12 @@ export default async function AdminStudentsPage({
             <tbody>
               {students.length === 0 && (
                 <tr>
-                  <td colSpan={staffIsAdmin ? 6 : 5} className="text-muted">
+                  <td colSpan={staffIsAdmin ? 5 : 4} className="text-muted">
                     Ничего не найдено.
                   </td>
                 </tr>
               )}
               {students.map((student) => {
-                const active = student.subscriptions.find((s) => s.status === "ACTIVE");
                 const paid = student.payments
                   .filter((p) => p.status === "PAID")
                   .reduce((sum, p) => sum + p.amountRub, 0);
@@ -139,11 +137,8 @@ export default async function AdminStudentsPage({
                         </p>
                       )}
                     </td>
-                    <td>{active ? active.plan.name : <span className="text-muted-dim">Нет</span>}</td>
                     <td>
-                      {active
-                        ? `${formatHourBalance(active.remainingClasses)} / ${formatHourBalance(active.totalClasses)}`
-                        : "—"}
+                      <StudentListSubscription subscriptions={student.subscriptions} />
                     </td>
                     {staffIsAdmin && <td>{formatRub(paid)}</td>}
                     <td className="text-right">

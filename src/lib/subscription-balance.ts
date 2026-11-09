@@ -11,6 +11,36 @@ export function roundHours(hours: number) {
   return Math.round(hours * 100) / 100;
 }
 
+export function formatHoursCompact(hours: number) {
+  const value = roundHours(hours);
+  if (value <= 0) return "0";
+  if (Number.isInteger(value)) return String(value);
+  return value.toFixed(1).replace(".", ",");
+}
+
+export function formatHoursRatio(remaining: number, total: number) {
+  return `${formatHoursCompact(remaining)} / ${formatHoursCompact(total)} ч`;
+}
+
+export type StudentSubscriptionRow = {
+  status: string;
+  remainingClasses: number;
+  totalClasses: number;
+  expiresAt: Date;
+  plan: { name: string };
+};
+
+export function pickStudentListSubscription(subs: StudentSubscriptionRow[]) {
+  const now = Date.now();
+  const usable = subs
+    .filter((s) => s.status === "ACTIVE" && new Date(s.expiresAt).getTime() >= now)
+    .sort((a, b) => b.remainingClasses - a.remainingClasses);
+  if (usable.length > 0) return usable[0];
+  const anyActive = subs.find((s) => s.status === "ACTIVE");
+  if (anyActive) return anyActive;
+  return null;
+}
+
 export function formatHourBalance(hours: number) {
   const value = roundHours(hours);
   if (value <= 0) return "0 часов";
