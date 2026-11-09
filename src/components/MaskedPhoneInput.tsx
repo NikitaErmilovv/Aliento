@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { formatPhoneInput, phoneDigits } from "@/lib/phone";
+import {
+  formatPhoneFromDigits,
+  normalizePhoneDigits,
+  phoneDigits,
+} from "@/lib/phone";
 
 export function MaskedPhoneInput({
   id = "phone",
@@ -18,21 +22,24 @@ export function MaskedPhoneInput({
   defaultValue?: string;
   placeholder?: string;
 }) {
-  const [value, setValue] = useState(() =>
-    defaultValue ? formatPhoneInput(defaultValue) : ""
+  const [digits, setDigits] = useState(() =>
+    defaultValue ? normalizePhoneDigits(defaultValue) : ""
   );
+  const display = digits ? formatPhoneFromDigits(digits) : "";
 
-  function handleChange(nextRaw: string) {
-    const digits = phoneDigits(nextRaw);
-    if (digits.length === 0) {
-      setValue("");
+  function handleChange(nextRaw: string, prevDisplay: string) {
+    if (!phoneDigits(nextRaw)) {
+      setDigits("");
       return;
     }
-    setValue(formatPhoneInput(nextRaw));
-  }
 
-  function handleFocus() {
-    if (!value) setValue("+7");
+    let nextDigits = normalizePhoneDigits(nextRaw);
+
+    if (nextRaw.length < prevDisplay.length && nextDigits === digits && nextDigits.length > 1) {
+      nextDigits = nextDigits.slice(0, -1);
+    }
+
+    setDigits(nextDigits);
   }
 
   return (
@@ -43,11 +50,13 @@ export function MaskedPhoneInput({
       inputMode="tel"
       autoComplete="tel"
       placeholder={placeholder}
-      value={value}
-      onChange={(event) => handleChange(event.target.value)}
-      onFocus={handleFocus}
+      value={display}
+      onChange={(event) => handleChange(event.target.value, display)}
+      onFocus={() => {
+        if (!digits) setDigits("7");
+      }}
       onBlur={() => {
-        if (value === "+7") setValue("");
+        if (digits === "7") setDigits("");
       }}
       required={required}
       className={className}

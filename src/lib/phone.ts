@@ -2,8 +2,8 @@ export function phoneDigits(value: string) {
   return value.replace(/\D/g, "");
 }
 
-/** Russian mobile display: +7 (900) 123-45-67 */
-export function formatPhoneInput(value: string) {
+/** Normalized digit string, always starting with 7 (up to 11 chars). */
+export function normalizePhoneDigits(value: string) {
   let digits = phoneDigits(value);
   if (digits.length === 0) return "";
 
@@ -15,9 +15,15 @@ export function formatPhoneInput(value: string) {
     digits = "7" + digits;
   }
 
-  digits = digits.slice(0, 11);
-  const local = digits.slice(1);
+  return digits.slice(0, 11);
+}
 
+/** Russian mobile display: +7 (900) 123-45-67 */
+export function formatPhoneFromDigits(digits: string) {
+  const normalized = normalizePhoneDigits(digits);
+  if (!normalized) return "";
+
+  const local = normalized.slice(1);
   if (local.length === 0) return "+7";
 
   let out = "+7";
@@ -29,6 +35,10 @@ export function formatPhoneInput(value: string) {
   if (local.length > 6) out += "-" + local.slice(6, 8);
   if (local.length > 8) out += "-" + local.slice(8, 10);
   return out;
+}
+
+export function formatPhoneInput(value: string) {
+  return formatPhoneFromDigits(normalizePhoneDigits(value));
 }
 
 export function isValidRuPhone(value: string) {
