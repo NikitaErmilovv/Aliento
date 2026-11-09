@@ -13,7 +13,7 @@ import {
   buildRecurringClassStarts,
   DEFAULT_RECURRING_WEEKS,
 } from "@/lib/recurring-classes";
-import { setIssuedStudentCredentials } from "@/lib/student-issue-flash";
+import { setNewStudentFlash } from "@/lib/student-issue-flash";
 
 export async function toggleDemoModeAction(enabled: boolean) {
   const staff = await requireStaff();
@@ -87,11 +87,15 @@ export async function createStudentByAdminAction(formData: FormData) {
     },
   });
 
-  await setIssuedStudentCredentials(user.id, { login: email, pass: plainPassword });
+  await setNewStudentFlash({
+    studentId: user.id,
+    name: user.name,
+    login: email,
+    pass: plainPassword,
+  });
 
   revalidatePath("/admin/students");
-  revalidatePath(`/admin/students/${user.id}`);
-  redirect(`/admin/students/${user.id}?issued=1`);
+  redirect("/admin/students?created=1");
 }
 
 export async function grantTeacherRoleAction(formData: FormData) {

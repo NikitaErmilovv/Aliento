@@ -8,16 +8,19 @@ import { prisma } from "@/lib/db";
 import { getUpcomingBirthdays, formatBirthdayFull } from "@/lib/birthdays";
 import { syncBirthdayAdminNotifications } from "@/lib/birthday-alerts";
 import { formatDate, formatRub, isAdmin } from "@/lib/format";
+import { readNewStudentFlash } from "@/lib/student-issue-flash";
 
 export default async function AdminStudentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; error?: string }>;
+  searchParams: Promise<{ q?: string; error?: string; created?: string }>;
 }) {
   const user = await requireStaff();
   const staffIsAdmin = isAdmin(user.role);
 
-  const { q, error } = await searchParams;
+  const { q, error, created } = await searchParams;
+  const newStudent =
+    staffIsAdmin && created === "1" ? await readNewStudentFlash() : null;
   const query = (q ?? "").trim().toLowerCase();
   const all = await prisma.user.findMany({ where: { role: "STUDENT" } });
   const upcomingBirthdays = getUpcomingBirthdays(all);
@@ -43,6 +46,26 @@ export default async function AdminStudentsPage({
       </div>
 
       {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
+
+      {newStudent && (
+        <section className="app-card border-success/40">
+          <h2 className="app-card-title text-success">Ученик «{newStudent.name}» создан</h2>
+          <p className="mt-2 text-sm text-muted">
+            Он уже в списке ниже. Передайте логин и пароль для входа. Карточку ученика можно открыть по
+            имени в таблице.
+          </p>
+          <dl className="mt-4 space-y-2 font-mono text-sm">
+            <div>
+              <dt className="text-xs text-muted-dim">Логин (email)</dt>
+              <dd className="text-foreground">{newStudent.login}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-dim">Пароль</dt>
+              <dd className="text-accent-300">{newStudent.pass}</dd>
+            </div>
+          </dl>
+        </section>
+      )}
 
       {staffIsAdmin && <CreateStudentPanel />}
 
@@ -92,8 +115,9 @@ export default async function AdminStudentsPage({
                 const paid = student.payments
                   .filter((p) => p.status === "PAID")
                   .reduce((sum, p) => sum + p.amountRub, 0);
+                const isNew = newStudent?.studentId === student.id;
                 return (
-                  <tr key={student.id}>
+                  <tr key={student.id} className={isNew ? "bg-success/5" : undefined}>
                     <td>
                       <Link
                         href={`/admin/students/${student.id}`}
