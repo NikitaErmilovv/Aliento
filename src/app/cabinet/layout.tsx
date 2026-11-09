@@ -11,7 +11,7 @@ export const metadata = {
 
 const tabs = [
   { href: "/cabinet", label: "Обзор" },
-  { href: "/cabinet/classes", label: "Мои занятия" },
+  { href: "/cabinet/classes", label: "Расписание" },
   { href: "/cabinet/subscriptions", label: "Абонементы" },
   { href: "/cabinet/profile", label: "Профиль" },
   { href: "/cabinet/notifications", label: "Сообщения" },

@@ -850,7 +850,7 @@ function hydrateAttendance(store: Store, row: Attendance) {
     ...row,
     createdAt: new Date(row.createdAt),
     user: { ...user, createdAt: new Date(user.createdAt) },
-    class: { ...cls, startsAt: new Date(cls.startsAt), endsAt: new Date(cls.endsAt) },
+    class: hydrateClass(store, cls),
   };
 }
 
@@ -1021,6 +1021,7 @@ export const prisma = {
       let rows = filterDemo(store.bookings, demoOn(store));
       if (where?.userId) rows = rows.filter((b) => b.userId === where.userId);
       if (where?.status) rows = rows.filter((b) => b.status === where.status);
+      if (where?.classId) rows = rows.filter((b) => b.classId === where.classId);
       const cls = where?.class as { startsAt?: { gte?: Date } } | undefined;
       if (cls?.startsAt?.gte) {
         rows = rows.filter((b) => {

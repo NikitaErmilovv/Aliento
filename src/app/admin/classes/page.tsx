@@ -1,10 +1,9 @@
+import Link from "next/link";
 import { SubmitButton } from "@/components/ButtonLink";
-import { AttendanceButtons } from "@/components/AttendanceButtons";
-import { StatusBadge } from "@/components/StatusBadge";
 import { requireStaff } from "@/actions/auth";
 import { createClassAction, deleteClassAction } from "@/actions/admin";
 import { prisma } from "@/lib/db";
-import { formatDate, formatTime, isAdmin, plural } from "@/lib/format";
+import { formatDate, formatTime, isAdmin } from "@/lib/format";
 
 export default async function AdminClassesPage({
   searchParams,
@@ -170,7 +169,6 @@ export default async function AdminClassesPage({
       <div className="grid gap-5">
         {classes.length === 0 && <p className="app-card card-body text-sm">Занятий пока нет.</p>}
         {classes.map((item) => {
-          const booked = item.bookings.filter((b) => b.status === "BOOKED");
           const past = item.startsAt < now;
           return (
             <section key={item.id} className="app-card">
@@ -185,10 +183,10 @@ export default async function AdminClassesPage({
                     {item.teacher.user.name} · {item.room} · {item.level}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="badge badge-muted">
-                    {booked.length}/{item.capacity} {plural(booked.length, ["запись", "записи", "записей"])}
-                  </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link href={`/admin/classes/${item.id}`} className="btn btn-primary btn-sm">
+                    Отметить посещение
+                  </Link>
                   {staffIsAdmin && !past && (
                     <form action={deleteClassAction}>
                       <input type="hidden" name="classId" value={item.id} />
@@ -199,37 +197,6 @@ export default async function AdminClassesPage({
                   )}
                 </div>
               </div>
-
-              {booked.length > 0 && (
-                <div className="mt-5 overflow-x-auto">
-                  <table className="data-table min-w-[560px]">
-                    <thead>
-                      <tr>
-                        <th>Ученик</th>
-                        <th>Телефон</th>
-                        <th className="text-right">Посещение</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {booked.map((booking) => (
-                        <tr key={booking.id}>
-                          <td className="text-foreground">{booking.user.name}</td>
-                          <td>{booking.user.phone}</td>
-                          <td className="text-right">
-                            <div className="flex justify-end">
-                              {booking.attendance ? (
-                                <StatusBadge status={booking.attendance.status} />
-                              ) : (
-                                <AttendanceButtons bookingId={booking.id} />
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
             </section>
           );
         })}

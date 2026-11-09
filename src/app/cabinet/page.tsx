@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { ButtonLink } from "@/components/ButtonLink";
-import { BookButton } from "@/components/BookButton";
 import { StatusBadge } from "@/components/StatusBadge";
 import { requireStudent } from "@/actions/auth";
 import { prisma } from "@/lib/db";
@@ -12,6 +11,7 @@ import {
   formatTime,
 } from "@/lib/format";
 import { formatHourBalance } from "@/lib/subscription-balance";
+import { filterClassesWithinDays } from "@/lib/schedule";
 
 export default async function CabinetOverview({
   searchParams,
@@ -41,19 +41,13 @@ export default async function CabinetOverview({
     : 0;
 
   const now = new Date();
-  const nextBooking = user.bookings
-    .filter((b) => b.status === "BOOKED" && b.class.startsAt >= now)
-    .sort((a, b) => a.class.startsAt.getTime() - b.class.startsAt.getTime())[0];
-
-  const upcomingClass = !nextBooking
-    ? (
-        await prisma.danceClass.findMany({
-          where: { startsAt: { gte: now } },
-          include: { bookings: { where: { status: "BOOKED" } } },
-          take: 1,
-        })
-      )[0]
-    : null;
+  const upcomingSchedule = filterClassesWithinDays(
+    await prisma.danceClass.findMany({
+      where: { startsAt: { gte: now } },
+      include: { teacher: { include: { user: true } } },
+    }),
+    7
+  ).sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
 
   const recentAttendance = attendances.slice(0, 5);
 
@@ -147,44 +141,31 @@ export default async function CabinetOverview({
         )}
       </section>
 
-      <section className="app-card">
-        <h2 className="app-card-title">Посетить следующее занятие</h2>
-        {nextBooking ? (
-          <div className="mt-5">
-            <p className="text-sm text-accent-300">
-              {formatDate(nextBooking.class.startsAt)} · {formatTime(nextBooking.class.startsAt)} —{" "}
-              {formatTime(nextBooking.class.endsAt)}
-            </p>
-            <p className="mt-3 font-display text-lg text-foreground">{nextBooking.class.title}</p>
-            <p className="mt-1.5 text-sm text-muted">
-              {nextBooking.class.room} · {nextBooking.class.teacher.user.name}
-            </p>
-            <div className="mt-6 flex items-center gap-3">
-              <StatusBadge status="BOOKED" label="Вы записаны" />
-              <Link href="/cabinet/classes" className="text-sm text-accent-300 link-underline">
-                Мои записи
-              </Link>
-            </div>
-          </div>
-        ) : upcomingClass ? (
-          <div className="mt-5">
-            <p className="text-sm text-accent-300">
-              {formatDate(upcomingClass.startsAt)} · {formatTime(upcomingClass.startsAt)} —{" "}
-              {formatTime(upcomingClass.endsAt)}
-            </p>
-            <p className="mt-3 font-display text-lg text-foreground">{upcomingClass.title}</p>
-            <p className="mt-1.5 text-sm text-muted">
-              {upcomingClass.room} · {upcomingClass.teacher.user.name}
-            </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <BookButton classId={upcomingClass.id} />
-              <Link href="/schedule" className="text-sm text-accent-300 link-underline">
-                Всё расписание
-              </Link>
-            </div>
-          </div>
+      <section className="app-card lg:col-span-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="app-card-title">Ближайшие занятия</h2>
+          <Link href="/cabinet/classes" className="text-sm text-accent-300 link-underline">
+            Расписание на 2 недели
+          </Link>
+        </div>
+        <p className="mt-2 text-sm text-muted">Без записи — приходите в зал в указанное время.</p>
+        {upcomingSchedule.length === 0 ? (
+          <p className="card-body mt-5 text-sm">На ближайшую неделю занятий в расписании нет.</p>
         ) : (
-          <p className="card-body mt-5 text-sm">Ближайших занятий пока нет.</p>
+          <ul className="mt-5 divide-y divide-border">
+            {upcomingSchedule.slice(0, 5).map((item) => (
+              <li key={item.id} className="flex flex-wrap gap-4 py-3">
+                <div className="w-36 shrink-0 text-sm text-accent-300">{formatDate(item.startsAt)}</div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                  <p className="mt-0.5 text-xs text-muted">
+                    {formatTime(item.startsAt)} — {formatTime(item.endsAt)} · {item.teacher.user.name} ·{" "}
+                    {item.room}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 

@@ -19,6 +19,11 @@ async function activeSubscription(userId: string) {
 
 export async function bookClassAction(classId: string) {
   const user = await requireUser();
+  if (user.role === "STUDENT") {
+    return {
+      error: "Запись на занятия в школе не нужна — просто приходите по расписанию.",
+    };
+  }
   const danceClass = await prisma.danceClass.findUnique({
     where: { id: classId },
     include: { bookings: { where: { status: "BOOKED" } } },

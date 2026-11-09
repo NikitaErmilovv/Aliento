@@ -202,6 +202,58 @@ export async function grantTeacherRoleAction(formData: FormData) {
   redirect("/admin/settings?saved=1");
 }
 
+export async function markClassStudentAttendanceAction(
+  classId: string,
+  userId: string,
+  status: "PRESENT" | "ABSENT"
+) {
+  const staff = await requireStaff();
+  const danceClass = await prisma.danceClass.findUnique({
+    where: { id: classId },
+    include: { teacher: true },
+  });
+  if (!danceClass) return { error: "Занятие не найдено." };
+  if (staff.role === "TEACHER" && danceClass.teacher.userId !== staff.id) {
+    return { error: "Можно отмечать только свои занятия." };
+  }
+
+  const student = await prisma.user.findUnique({ where: { id: userId } });
+  if (!student || student.role !== "STUDENT") return { error: "Ученик не найден." };
+
+  const marked = await prisma.attendance.findMany({ where: { classId, userId } });
+  if (marked.length > 0) return { error: "Посещение уже отмечено." };
+
+  let booking = await prisma.booking.findFirst({
+    where: { classId, userId, status: "BOOKED" },
+  });
+  if (!booking) {
+    booking = await prisma.booking.create({
+      data: { userId, classId, status: "BOOKED" },
+    });
+  }
+
+  await prisma.attendance.create({
+    data: {
+      bookingId: booking.id,
+      userId,
+      classId,
+      status,
+    },
+  });
+
+  if (status === "PRESENT") {
+    const hours = classDurationHours(danceClass.startsAt, danceClass.endsAt);
+    await deductHoursFromActiveSubscription(userId, hours);
+  }
+
+  revalidatePath("/admin/classes");
+  revalidatePath(`/admin/classes/${classId}`);
+  revalidatePath("/cabinet");
+  revalidatePath("/cabinet/classes");
+  revalidatePath("/cabinet/subscriptions");
+  return { ok: true };
+}
+
 export async function markAttendanceAction(bookingId: string, status: "PRESENT" | "ABSENT") {
   const staff = await requireStaff();
   const booking = await prisma.booking.findUnique({

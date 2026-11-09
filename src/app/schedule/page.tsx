@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { BookButton } from "@/components/BookButton";
 import { CtaBanner } from "@/components/CtaBanner";
 import { Container } from "@/components/Container";
 import { ButtonLink } from "@/components/ButtonLink";
@@ -17,8 +16,6 @@ import { formatDate, formatTime } from "@/lib/format";
 import { filterClassesWithinDays } from "@/lib/schedule";
 import { loadHallGrid } from "@/lib/hall-grids";
 import { isoDate, startOfWeek } from "@/lib/hall-grid";
-import { getCurrentUser } from "@/lib/session";
-
 export const dynamic = "force-static";
 
 export const metadata = buildMetadata({
@@ -29,8 +26,6 @@ export const metadata = buildMetadata({
 });
 
 export default async function SchedulePage() {
-  const user =
-    process.env.ALIENTO_MELISSA_EXPORT === "1" ? null : await getCurrentUser();
   const weekStart = startOfWeek(new Date());
   const weekStartIso = isoDate(weekStart);
 
@@ -62,7 +57,7 @@ export default async function SchedulePage() {
       <PageHeader
         eyebrow="Расписание"
         title="Занятость зала и занятия"
-        description="Сверху — календарь зала по дням: когда идут занятия школы, когда зал сдан, когда свободен. Ниже — ближайшие занятия на три дня и запись."
+        description="Сверху — календарь зала по дням: когда идут занятия школы, когда зал сдан, когда свободен. Ниже — ближайшие занятия на три дня."
       >
         <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
           <ButtonLink href="/subscriptions">Абонементы</ButtonLink>
@@ -100,7 +95,7 @@ export default async function SchedulePage() {
 
           <div className="app-card">
             <h2 className="font-display text-xl md:text-2xl">Ближайшие занятия</h2>
-            <p className="mt-2 text-sm text-muted">Следующие три дня — запись из личного кабинета.</p>
+            <p className="mt-2 text-sm text-muted">Следующие три дня — приходите без предварительной записи.</p>
             <div className="mt-6 overflow-x-auto">
               {upcomingClasses.length === 0 ? (
                 <p className="text-sm text-muted">В ближайшие три дня занятий в расписании нет.</p>
@@ -112,43 +107,24 @@ export default async function SchedulePage() {
                       <th>Время</th>
                       <th>Занятие</th>
                       <th>Уровень</th>
-                      <th />
+                      <th>Зал</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {upcomingClasses.map((item) => {
-                      const taken = item.bookings.length;
-                      const already = user ? item.bookings.some((b) => b.userId === user.id) : false;
-                      return (
-                        <tr key={item.id}>
-                          <td>{formatDate(item.startsAt)}</td>
-                          <td className="text-accent-300">{formatTime(item.startsAt)}</td>
-                          <td>
-                            <p className="font-medium text-foreground">{item.title}</p>
-                            <p className="text-xs text-muted-dim">{item.teacher.user.name}</p>
-                          </td>
-                          <td>{item.level}</td>
-                          <td>
-                            {!user ? (
-                              <a href="/login" className="text-sm text-accent-300 link-underline">
-                                Войти для записи
-                              </a>
-                            ) : (
-                              <BookButton
-                                classId={item.id}
-                                disabledReason={
-                                  already
-                                    ? "Вы уже записаны"
-                                    : taken >= item.capacity
-                                      ? "Мест нет"
-                                      : undefined
-                                }
-                              />
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {upcomingClasses.map((item) => (
+                      <tr key={item.id}>
+                        <td>{formatDate(item.startsAt)}</td>
+                        <td className="text-accent-300">
+                          {formatTime(item.startsAt)} — {formatTime(item.endsAt)}
+                        </td>
+                        <td>
+                          <p className="font-medium text-foreground">{item.title}</p>
+                          <p className="text-xs text-muted-dim">{item.teacher.user.name}</p>
+                        </td>
+                        <td>{item.level}</td>
+                        <td>{item.room}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               )}
