@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { CreateStudentPanel } from "@/components/CreateStudentPanel";
 import { InviteCodesPanel } from "@/components/InviteCodesPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { UpcomingBirthdaysPanel } from "@/components/UpcomingBirthdaysPanel";
@@ -12,12 +13,12 @@ import { formatDate, formatRub, isAdmin } from "@/lib/format";
 export default async function AdminStudentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; error?: string }>;
 }) {
   const user = await requireStaff();
   const staffIsAdmin = isAdmin(user.role);
 
-  const { q } = await searchParams;
+  const { q, error } = await searchParams;
   const query = (q ?? "").trim().toLowerCase();
   const all = await prisma.user.findMany({ where: { role: "STUDENT" } });
   const upcomingBirthdays = getUpcomingBirthdays(all);
@@ -44,6 +45,9 @@ export default async function AdminStudentsPage({
         <p className="text-sm text-muted">Всего: {all.length}</p>
       </div>
 
+      {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
+
+      {staffIsAdmin && <CreateStudentPanel />}
       {staffIsAdmin && <InviteCodesPanel codes={inviteCodes} />}
 
       <UpcomingBirthdaysPanel birthdays={upcomingBirthdays} />

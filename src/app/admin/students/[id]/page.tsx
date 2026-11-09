@@ -21,13 +21,13 @@ export default async function AdminStudentProfile({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; granted?: string }>;
+  searchParams: Promise<{ error?: string; granted?: string; issued?: string; login?: string; pass?: string }>;
 }) {
   const staff = await requireStaff();
   const staffIsAdmin = isAdmin(staff.role);
 
   const { id } = await params;
-  const { error, granted } = await searchParams;
+  const { error, granted, issued, login, pass } = await searchParams;
   const plans = staffIsAdmin ? await prisma.plan.findMany() : [];
   const student = await prisma.user.findUnique({ where: { id } });
   if (!student || student.role !== "STUDENT") {
@@ -46,6 +46,22 @@ export default async function AdminStudentProfile({
     <div className="space-y-5">
       {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
       {granted && <p className="app-card text-sm text-success">Абонемент выдан ученику.</p>}
+      {staffIsAdmin && issued === "1" && login && pass && (
+        <section className="app-card border-success/40">
+          <h2 className="app-card-title text-success">Ученик создан — данные для входа</h2>
+          <p className="mt-2 text-sm text-muted">Сохраните и передайте ученику. Пароль больше не покажется в интерфейсе.</p>
+          <dl className="mt-4 space-y-2 font-mono text-sm">
+            <div>
+              <dt className="text-xs text-muted-dim">Логин (email)</dt>
+              <dd className="text-foreground">{login}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-dim">Пароль</dt>
+              <dd className="text-accent-300">{pass}</dd>
+            </div>
+          </dl>
+        </section>
+      )}
 
       <Link href="/admin/students" className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />

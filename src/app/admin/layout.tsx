@@ -12,7 +12,6 @@ export const metadata = {
 const adminItems: AdminNavItem[] = [
   { href: "/admin", label: "Панель управления", icon: "dashboard" },
   { href: "/admin/schedule", label: "Расписание", icon: "schedule" },
-  { href: "/admin/halls", label: "Занятость зала", icon: "halls" },
   { href: "/admin/classes", label: "Занятия", icon: "classes" },
   { href: "/admin/students", label: "Ученики", icon: "students" },
   { href: "/admin/plans", label: "Абонементы", icon: "plans" },
@@ -26,7 +25,6 @@ const adminItems: AdminNavItem[] = [
 const teacherItems: AdminNavItem[] = [
   { href: "/admin", label: "Панель управления", icon: "dashboard" },
   { href: "/admin/schedule", label: "Расписание", icon: "schedule" },
-  { href: "/admin/halls", label: "Занятость зала", icon: "halls" },
   { href: "/admin/classes", label: "Мои занятия", icon: "classes" },
   { href: "/admin/students", label: "Ученики", icon: "students" },
 ];

@@ -6,6 +6,9 @@ import { prisma } from "@/lib/db";
 import { requireStaff } from "@/actions/auth";
 import { isAdmin } from "@/lib/format";
 import { randomBytes } from "node:crypto";
+import { hashPassword } from "@/lib/db";
+import { isValidDateOfBirth, normalizeDateOfBirth } from "@/lib/birthdays";
+import { isValidRuPhone, normalizePhone } from "@/lib/phone";
 import {
   buildRecurringClassStarts,
   DEFAULT_RECURRING_WEEKS,
@@ -22,6 +25,69 @@ export async function toggleDemoModeAction(enabled: boolean) {
 
 function makeInviteCode() {
   return randomBytes(4).toString("hex").toUpperCase();
+}
+
+function makeStudentLoginEmail() {
+  return `uch-${randomBytes(4).toString("hex")}@aliento.test`;
+}
+
+function makeStudentPassword() {
+  return randomBytes(5).toString("base64url").slice(0, 10);
+}
+
+export async function createStudentByAdminAction(formData: FormData) {
+  const staff = await requireStaff();
+  if (!isAdmin(staff.role)) redirect("/admin/students?error=Недостаточно прав.");
+
+  const name = String(formData.get("name") || "").trim();
+  const phoneRaw = String(formData.get("phone") || "").trim();
+  const dateOfBirthRaw = String(formData.get("dateOfBirth") || "").trim();
+  let email = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+
+  if (!name || !phoneRaw || !dateOfBirthRaw) {
+    redirect("/admin/students?error=Укажите имя, телефон и дату рождения.");
+  }
+
+  const dateOfBirth = normalizeDateOfBirth(dateOfBirthRaw);
+  if (!dateOfBirth || !isValidDateOfBirth(dateOfBirth)) {
+    redirect("/admin/students?error=Укажите корректную дату рождения (ДД.ММ.ГГГГ).");
+  }
+
+  if (!isValidRuPhone(phoneRaw)) {
+    redirect("/admin/students?error=Укажите корректный номер телефона.");
+  }
+
+  const phone = normalizePhone(phoneRaw);
+  if (!email) email = makeStudentLoginEmail();
+
+  const exists = await prisma.user.findUnique({ where: { email } });
+  if (exists) redirect("/admin/students?error=Этот email уже занят.");
+
+  const plainPassword = makeStudentPassword();
+
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email,
+      phone,
+      dateOfBirth,
+      passwordHash: hashPassword(plainPassword),
+      role: "STUDENT",
+      blocked: false,
+      isDemo: false,
+      emailVerified: true,
+    },
+  });
+
+  revalidatePath("/admin/students");
+  const q = new URLSearchParams({
+    issued: "1",
+    login: email,
+    pass: plainPassword,
+  });
+  redirect(`/admin/students/${user.id}?${q.toString()}`);
 }
 
 export async function generateInviteCodeAction() {
