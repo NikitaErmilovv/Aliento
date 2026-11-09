@@ -31,7 +31,7 @@ export function GrantSubscriptionForm({
         <select id={`plan-${studentId}`} name="planId" className="field" required defaultValue={plans[0]?.id}>
           {plans.map((plan) => (
             <option key={plan.id} value={plan.id}>
-              {plan.name} ({plan.classCount} зан., {plan.priceRub} ₽)
+              {plan.name} ({plan.classCount} ч, {plan.priceRub} ₽)
             </option>
           ))}
         </select>

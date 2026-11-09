@@ -13,6 +13,12 @@ import { requireUser } from "@/actions/auth";
 
 export async function buyPlanAction(planId: string) {
   const user = await requireUser();
+  if (user.role === "STUDENT") {
+    return {
+      error:
+        "Абонемент оформляет администратор школы. Напишите в Telegram или на ресепшене — после оплаты часы появятся в кабинете.",
+    };
+  }
   const plan = await prisma.plan.findUnique({ where: { id: planId } });
   if (!plan) return { error: "Тариф не найден." };
 

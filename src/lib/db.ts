@@ -528,6 +528,42 @@ function seed(): Store {
   };
 }
 
+/** Тарифы как на главной: часы, не самостоятельная покупка в кабинете. */
+export function defaultSchoolPlans(): Plan[] {
+  return [
+    {
+      id: uid(),
+      name: "6 часов",
+      classCount: 6,
+      durationDays: 30,
+      priceRub: 2800,
+      popular: false,
+      description: "Абонемент на 6 часов занятий по расписанию.",
+      isDemo: false,
+    },
+    {
+      id: uid(),
+      name: "8 часов",
+      classCount: 8,
+      durationDays: 45,
+      priceRub: 3600,
+      popular: false,
+      description: "Абонемент на 8 часов — удобный средний объём.",
+      isDemo: false,
+    },
+    {
+      id: uid(),
+      name: "12 часов",
+      classCount: 12,
+      durationDays: 60,
+      priceRub: 4100,
+      popular: true,
+      description: "Максимум часов по выгодной цене.",
+      isDemo: false,
+    },
+  ];
+}
+
 /** Empty operational data; keeps test staff logins (password aliento123). demoMode off. */
 export function seedClean(): Store {
   const passwordHash = hashPassword("aliento123");
@@ -579,7 +615,7 @@ export function seedClean(): Store {
     hallRentals: [],
     classes: [],
     bookings: [],
-    plans: [],
+    plans: defaultSchoolPlans(),
     subscriptions: [],
     attendances: [],
     payments: [],
@@ -636,6 +672,9 @@ function migrateStore(raw: Partial<Store>): Store {
   }
   if (!(store.events ?? []).some((e) => e.id === "party-1")) {
     store.events = catalogToEventItems();
+  }
+  if (!store.plans?.length) {
+    store.plans = defaultSchoolPlans();
   }
 
   for (const user of store.users ?? []) {

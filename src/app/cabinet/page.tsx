@@ -11,6 +11,7 @@ import {
   formatMonthYear,
   formatTime,
 } from "@/lib/format";
+import { formatHourBalance } from "@/lib/subscription-balance";
 
 export default async function CabinetOverview({
   searchParams,
@@ -106,18 +107,20 @@ export default async function CabinetOverview({
       </section>
 
       <section className="app-card">
-        <h2 className="app-card-title">Мои абонементы</h2>
+        <h2 className="app-card-title">Мой абонемент</h2>
         {activeSub ? (
           <div className="mt-5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-medium text-foreground">{activeSub.plan.name}</p>
               <StatusBadge status="ACTIVE" />
             </div>
+            <p className="mt-1 text-xs text-muted">Выдан школой</p>
             <div className="mt-5">
               <div className="flex items-center justify-between text-xs text-muted">
-                <span>Осталось занятий</span>
+                <span>Осталось часов</span>
                 <span className="text-foreground">
-                  {activeSub.remainingClasses} из {activeSub.totalClasses}
+                  {formatHourBalance(activeSub.remainingClasses)} из{" "}
+                  {formatHourBalance(activeSub.totalClasses)}
                 </span>
               </div>
               <div className="progress-track mt-2.5">
@@ -129,21 +132,17 @@ export default async function CabinetOverview({
               <span className="text-foreground">{formatDate(activeSub.expiresAt)}</span>
             </div>
             <div className="mt-6">
-              <ButtonLink href="/subscriptions" variant="secondary" size="sm">
-                Купить абонемент
+              <ButtonLink href="/cabinet/subscriptions" variant="secondary" size="sm">
+                Подробнее
               </ButtonLink>
             </div>
           </div>
         ) : (
           <div className="mt-5">
             <p className="card-body text-sm">
-              Активного абонемента нет. Купите абонемент, чтобы записываться на занятия.
+              Активного абонемента нет. Обратитесь к администратору или преподавателю в школе — они
+              выдадут абонемент после оплаты.
             </p>
-            <div className="mt-5">
-              <ButtonLink href="/subscriptions" size="sm">
-                Выбрать абонемент
-              </ButtonLink>
-            </div>
           </div>
         )}
       </section>

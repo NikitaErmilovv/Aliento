@@ -1,11 +1,9 @@
-import { ButtonLink } from "@/components/ButtonLink";
-import { PaymentReturnBanner } from "@/components/PaymentReturnBanner";
 import { StatusBadge } from "@/components/StatusBadge";
 import { requireStudent } from "@/actions/auth";
 import { prisma } from "@/lib/db";
-import { formatDate, formatRub } from "@/lib/format";
+import { formatDate } from "@/lib/format";
+import { formatHourBalance } from "@/lib/subscription-balance";
 import { cn } from "@/lib/cn";
-import { Suspense } from "react";
 
 export default async function CabinetSubscriptionsPage() {
   const user = await requireStudent();
@@ -15,23 +13,24 @@ export default async function CabinetSubscriptionsPage() {
 
   return (
     <div className="grid gap-5">
-      <Suspense fallback={null}>
-        <PaymentReturnBanner />
-      </Suspense>
       <section className="app-card">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="app-card-title">Активные абонементы</h2>
-          <ButtonLink href="/subscriptions" size="sm">
-            Купить абонемент
-          </ButtonLink>
+          <h2 className="app-card-title">Мои абонементы</h2>
         </div>
+        <p className="mt-3 text-sm text-muted">
+          Абонементы выдаёт школа после оплаты. Если нужно продлить или купить часы — напишите
+          администратору или преподавателю.
+        </p>
 
         {active.length === 0 ? (
-          <p className="card-body mt-5 text-sm">Активных абонементов нет.</p>
+          <p className="card-body mt-5 text-sm">Активных абонементов нет — обратитесь в школу.</p>
         ) : (
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {active.map((sub) => {
-              const ratio = Math.round((sub.remainingClasses / sub.totalClasses) * 100);
+              const ratio =
+                sub.totalClasses > 0
+                  ? Math.round((sub.remainingClasses / sub.totalClasses) * 100)
+                  : 0;
               return (
                 <article
                   key={sub.id}
@@ -40,15 +39,16 @@ export default async function CabinetSubscriptionsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium text-foreground">{sub.plan.name}</p>
-                      <p className="mt-1 text-xs text-muted">{formatRub(sub.plan.priceRub)}</p>
+                      <p className="mt-1 text-xs text-muted">Выдано школой</p>
                     </div>
                     <StatusBadge status={sub.status} />
                   </div>
                   <div className="mt-5">
                     <div className="flex items-center justify-between text-xs text-muted">
-                      <span>Осталось занятий</span>
+                      <span>Осталось часов</span>
                       <span className="text-foreground">
-                        {sub.remainingClasses} из {sub.totalClasses}
+                        {formatHourBalance(sub.remainingClasses)} из{" "}
+                        {formatHourBalance(sub.totalClasses)}
                       </span>
                     </div>
                     <div className="progress-track mt-2.5">
@@ -72,8 +72,8 @@ export default async function CabinetSubscriptionsPage() {
             <thead>
               <tr>
                 <th>Абонемент</th>
-                <th>Занятий</th>
-                <th>Куплен</th>
+                <th>Часы</th>
+                <th>Выдан</th>
                 <th>Действовал до</th>
                 <th className="text-right">Статус</th>
               </tr>
@@ -90,7 +90,8 @@ export default async function CabinetSubscriptionsPage() {
                 <tr key={sub.id}>
                   <td className="text-foreground">{sub.plan.name}</td>
                   <td>
-                    {sub.totalClasses - sub.remainingClasses} из {sub.totalClasses}
+                    {formatHourBalance(sub.totalClasses - sub.remainingClasses)} использовано из{" "}
+                    {formatHourBalance(sub.totalClasses)}
                   </td>
                   <td>{formatDate(sub.createdAt)}</td>
                   <td>{formatDate(sub.expiresAt)}</td>

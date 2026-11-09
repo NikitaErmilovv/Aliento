@@ -36,8 +36,8 @@ export async function fulfillPlanPayment(paymentId: string) {
   await prisma.notification.create({
     data: {
       userId: payment.userId,
-      title: "Абонемент активирован",
-      body: `${plan.name}: ${plan.classCount} занятий, действует до ${expiresAt.toLocaleDateString("ru-RU")}.`,
+      title: "Абонемент выдан",
+      body: `${plan.name}: ${plan.classCount} ч, действует до ${expiresAt.toLocaleDateString("ru-RU")}.`,
     },
   });
 

@@ -6,6 +6,11 @@ import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { prisma } from "../src/lib/db";
+import {
+  classDurationHours,
+  deductHoursFromActiveSubscription,
+  roundHours,
+} from "../src/lib/subscription-balance";
 
 const dataFile = join(process.cwd(), "data", "aliento.json");
 
@@ -34,7 +39,7 @@ async function main() {
   // Admin: тариф
   const plan = await prisma.plan.create({
     data: {
-      name: "Тест 4 занятия",
+      name: "Тест 4 часа",
       classCount: 4,
       durationDays: 30,
       priceRub: 5000,
@@ -101,21 +106,17 @@ async function main() {
     },
   });
 
-  if (subBefore) {
-    const remaining = subBefore.remainingClasses - 1;
-    await prisma.subscription.update({
-      where: { id: subBefore.id },
-      data: {
-        remainingClasses: remaining,
-        status: remaining <= 0 ? "EXHAUSTED" : "ACTIVE",
-      },
-    });
-  }
+  const deduct = classDurationHours(danceClass.startsAt, danceClass.endsAt);
+  await deductHoursFromActiveSubscription(student.id, deduct);
 
   const subAfter = await prisma.subscription.findFirst({
     where: { userId: student.id, status: "ACTIVE" },
   });
-  assert(subAfter?.remainingClasses === 3, `Expected 3 classes left, got ${subAfter?.remainingClasses}`);
+  const expected = roundHours(4 - deduct);
+  assert(
+    subAfter?.remainingClasses === expected,
+    `Expected ${expected} hours left, got ${subAfter?.remainingClasses}`
+  );
 
   const students = await prisma.user.findMany({ where: { role: "STUDENT" } });
   assert(students.length === 1, `Expected 1 student, got ${students.length}`);
@@ -124,7 +125,7 @@ async function main() {
   console.log("  ✓ clean store / demoMode off");
   console.log("  ✓ plan + subscription (admin flow)");
   console.log("  ✓ class + booking (student)");
-  console.log("  ✓ attendance → списание абонемента (3/4 осталось)");
+  console.log(`  ✓ attendance → списание часов (осталось ${expected} ч)`);
   console.log(`\nSmoke student id: ${student.id}, class id: ${danceClass.id}`);
 }
 

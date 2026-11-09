@@ -9,6 +9,7 @@ import { getUpcomingBirthdays, formatBirthdayFull } from "@/lib/birthdays";
 import { syncBirthdayAdminNotifications } from "@/lib/birthday-alerts";
 import { formatDate, formatRub, isAdmin } from "@/lib/format";
 import { readNewStudentFlash } from "@/lib/student-issue-flash";
+import { formatHourBalance } from "@/lib/subscription-balance";
 
 export default async function AdminStudentsPage({
   searchParams,
@@ -97,7 +98,7 @@ export default async function AdminStudentsPage({
                 <th>Имя</th>
                 <th>Контакты</th>
                 <th>Абонемент</th>
-                <th>Остаток</th>
+                <th>Остаток (ч)</th>
                 {staffIsAdmin && <th>Оплачено</th>}
                 <th className="text-right">Статус</th>
               </tr>
@@ -140,7 +141,9 @@ export default async function AdminStudentsPage({
                     </td>
                     <td>{active ? active.plan.name : <span className="text-muted-dim">Нет</span>}</td>
                     <td>
-                      {active ? `${active.remainingClasses} из ${active.totalClasses}` : "—"}
+                      {active
+                        ? `${formatHourBalance(active.remainingClasses)} / ${formatHourBalance(active.totalClasses)}`
+                        : "—"}
                     </td>
                     {staffIsAdmin && <td>{formatRub(paid)}</td>}
                     <td className="text-right">

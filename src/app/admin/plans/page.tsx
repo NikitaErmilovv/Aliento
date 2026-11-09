@@ -63,7 +63,7 @@ export default async function AdminPlansPage({
             <thead>
               <tr>
                 <th>Название</th>
-                <th>Занятий</th>
+                <th>Часов</th>
                 <th>Срок</th>
                 <th>Цена</th>
                 <th>Активных</th>
@@ -115,9 +115,9 @@ export default async function AdminPlansPage({
           </div>
           <div>
             <label className="field-label" htmlFor="classCount">
-              Занятий
+              Часов в абонементе
             </label>
-            <input id="classCount" name="classCount" type="number" min={1} defaultValue={8} className="field" />
+            <input id="classCount" name="classCount" type="number" min={0.5} step={0.5} defaultValue={8} className="field" />
           </div>
           <div>
             <label className="field-label" htmlFor="durationDays">

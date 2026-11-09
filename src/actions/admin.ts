@@ -14,6 +14,11 @@ import {
   DEFAULT_RECURRING_WEEKS,
 } from "@/lib/recurring-classes";
 import { setNewStudentFlash } from "@/lib/student-issue-flash";
+import {
+  classDurationHours,
+  deductHoursFromActiveSubscription,
+  roundHours,
+} from "@/lib/subscription-balance";
 
 export async function toggleDemoModeAction(enabled: boolean) {
   const staff = await requireStaff();
@@ -219,29 +224,14 @@ export async function markAttendanceAction(bookingId: string, status: "PRESENT" 
   });
 
   if (status === "PRESENT") {
-    const sub = await prisma.subscription.findFirst({
-      where: {
-        userId: booking.userId,
-        status: "ACTIVE",
-        remainingClasses: { gt: 0 },
-      },
-      orderBy: { expiresAt: "asc" },
-    });
-    if (sub) {
-      const remaining = sub.remainingClasses - 1;
-      await prisma.subscription.update({
-        where: { id: sub.id },
-        data: {
-          remainingClasses: remaining,
-          status: remaining <= 0 ? "EXHAUSTED" : "ACTIVE",
-        },
-      });
-    }
+    const hours = classDurationHours(booking.class.startsAt, booking.class.endsAt);
+    await deductHoursFromActiveSubscription(booking.userId, hours);
   }
 
   revalidatePath("/admin");
   revalidatePath("/admin/classes");
   revalidatePath("/cabinet");
+  revalidatePath("/cabinet/subscriptions");
   return { ok: true };
 }
 
@@ -396,7 +386,6 @@ export async function deletePlanAction(formData: FormData) {
 
 export async function grantSubscriptionAction(formData: FormData) {
   const staff = await requireStaff();
-  if (!isAdmin(staff.role)) redirect("/admin/students?error=Недостаточно прав.");
 
   const studentId = String(formData.get("studentId") || "");
   const planId = String(formData.get("planId") || "");
@@ -431,13 +420,98 @@ export async function grantSubscriptionAction(formData: FormData) {
     data: {
       userId: student.id,
       title: "Абонемент выдан",
-      body: `Администратор активировал «${plan.name}»: ${plan.classCount} занятий до ${expiresAt.toLocaleDateString("ru-RU")}.`,
+      body: `Школа выдала «${plan.name}»: ${plan.classCount} ч до ${expiresAt.toLocaleDateString("ru-RU")}.`,
     },
   });
 
   revalidatePath("/admin/students");
   revalidatePath(`/admin/students/${studentId}`);
   revalidatePath("/admin/plans");
+  revalidatePath("/cabinet");
+  revalidatePath("/cabinet/subscriptions");
+  redirect(`/admin/students/${studentId}?granted=1`);
+}
+
+export async function adjustSubscriptionHoursAction(formData: FormData) {
+  const staff = await requireStaff();
+  if (!isAdmin(staff.role)) redirect("/admin/students?error=Недостаточно прав.");
+
+  const subscriptionId = String(formData.get("subscriptionId") || "");
+  const studentId = String(formData.get("studentId") || "");
+  const addHours = Number(formData.get("addHours") || 0);
+  if (!subscriptionId || addHours <= 0) {
+    redirect(`/admin/students/${studentId}?error=Укажите количество часов.`);
+  }
+
+  const sub = await prisma.subscription.findUnique({ where: { id: subscriptionId } });
+  if (!sub) redirect(`/admin/students/${studentId}?error=Абонемент не найден.`);
+
+  const remaining = roundHours(sub.remainingClasses + addHours);
+  const total = roundHours(Math.max(sub.totalClasses, remaining));
+  await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      remainingClasses: remaining,
+      totalClasses: total,
+      status: "ACTIVE",
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: sub.userId,
+      title: "Начислены часы",
+      body: `На абонемент добавлено ${addHours} ч. Остаток: ${remaining} ч.`,
+    },
+  });
+
+  revalidatePath(`/admin/students/${studentId}`);
+  revalidatePath("/cabinet");
+  revalidatePath("/cabinet/subscriptions");
+  redirect(`/admin/students/${studentId}?granted=1`);
+}
+
+export async function renewSubscriptionAction(formData: FormData) {
+  const staff = await requireStaff();
+  if (!isAdmin(staff.role)) redirect("/admin/students?error=Недостаточно прав.");
+
+  const subscriptionId = String(formData.get("subscriptionId") || "");
+  const studentId = String(formData.get("studentId") || "");
+  const extendDays = Number(formData.get("extendDays") || 0);
+  const refillHours = formData.get("refillHours") === "1";
+
+  const sub = await prisma.subscription.findUnique({ where: { id: subscriptionId } });
+  if (!sub) redirect(`/admin/students/${studentId}?error=Абонемент не найден.`);
+  const plan = await prisma.plan.findUnique({ where: { id: sub.planId } });
+  if (!plan) redirect(`/admin/students/${studentId}?error=Тариф не найден.`);
+  if (extendDays <= 0) redirect(`/admin/students/${studentId}?error=Укажите срок продления.`);
+
+  const base = sub.expiresAt.getTime() < Date.now() ? new Date() : new Date(sub.expiresAt);
+  const expiresAt = new Date(base);
+  expiresAt.setDate(expiresAt.getDate() + extendDays);
+
+  const remaining = refillHours ? plan.classCount : sub.remainingClasses;
+  const total = refillHours ? plan.classCount : roundHours(Math.max(sub.totalClasses, remaining));
+
+  await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      expiresAt: expiresAt.toISOString(),
+      remainingClasses: roundHours(remaining),
+      totalClasses: roundHours(total),
+      status: remaining > 0 ? "ACTIVE" : "EXHAUSTED",
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: sub.userId,
+      title: "Абонемент продлён",
+      body: `Срок действия до ${expiresAt.toLocaleDateString("ru-RU")}. Остаток: ${roundHours(remaining)} ч.`,
+    },
+  });
+
+  revalidatePath(`/admin/students/${studentId}`);
   revalidatePath("/cabinet");
   revalidatePath("/cabinet/subscriptions");
   redirect(`/admin/students/${studentId}?granted=1`);

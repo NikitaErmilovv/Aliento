@@ -16,6 +16,8 @@ import {
   isAdmin,
 } from "@/lib/format";
 import { formatBirthdayFull, ageOnNextBirthday } from "@/lib/birthdays";
+import { formatHourBalance } from "@/lib/subscription-balance";
+import { SubscriptionAdjustForm } from "@/components/SubscriptionAdjustForm";
 
 export default async function AdminStudentProfile({
   params,
@@ -29,7 +31,7 @@ export default async function AdminStudentProfile({
 
   const { id } = await params;
   const { error, granted, saved } = await searchParams;
-  const plans = staffIsAdmin ? await prisma.plan.findMany() : [];
+  const plans = await prisma.plan.findMany();
   const student = await prisma.user.findUnique({ where: { id } });
   if (!student || student.role !== "STUDENT") {
     return <p className="app-card card-body text-sm">Ученик не найден.</p>;
@@ -108,15 +110,17 @@ export default async function AdminStudentProfile({
           </div>
         )}
         <div className="app-card">
-          <p className="stat-label">Остаток занятий</p>
-          <p className="stat-value">{activeSub ? activeSub.remainingClasses : 0}</p>
+          <p className="stat-label">Остаток часов</p>
+          <p className="stat-value">
+            {activeSub ? formatHourBalance(activeSub.remainingClasses) : "—"}
+          </p>
         </div>
       </div>
 
       <div className={`grid gap-5 ${staffIsAdmin ? "xl:grid-cols-2" : ""}`}>
         <section className="app-card">
           <h2 className="app-card-title">Абонементы</h2>
-          {staffIsAdmin && <GrantSubscriptionForm studentId={student.id} plans={plans} />}
+          <GrantSubscriptionForm studentId={student.id} plans={plans} />
           <div className="mt-5 overflow-x-auto">
             <table className="data-table min-w-[420px]">
               <thead>
@@ -140,7 +144,7 @@ export default async function AdminStudentProfile({
                   <tr key={sub.id}>
                     <td className="text-foreground">{sub.plan.name}</td>
                     <td>
-                      {sub.remainingClasses}/{sub.totalClasses}
+                      {formatHourBalance(sub.remainingClasses)} / {formatHourBalance(sub.totalClasses)}
                     </td>
                     <td>{formatDate(sub.expiresAt)}</td>
                     <td className="text-right">
@@ -160,6 +164,16 @@ export default async function AdminStudentProfile({
               </tbody>
             </table>
           </div>
+          {staffIsAdmin &&
+            student.subscriptions
+              .filter((s) => s.status === "ACTIVE" || s.status === "EXHAUSTED")
+              .map((sub) => (
+                <SubscriptionAdjustForm
+                  key={`adj-${sub.id}`}
+                  subscription={sub}
+                  studentId={student.id}
+                />
+              ))}
         </section>
 
         {staffIsAdmin && (
