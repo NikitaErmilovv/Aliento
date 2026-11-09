@@ -15,7 +15,7 @@ import {
   isAdmin,
 } from "@/lib/format";
 import { formatBirthdayFull, ageOnNextBirthday } from "@/lib/birthdays";
-import { takeIssuedStudentCredentials } from "@/lib/student-issue-flash";
+import { readIssuedStudentCredentials } from "@/lib/student-issue-flash";
 
 export default async function AdminStudentProfile({
   params,
@@ -30,7 +30,7 @@ export default async function AdminStudentProfile({
   const { id } = await params;
   const { error, granted, issued } = await searchParams;
   const issuedCreds =
-    staffIsAdmin && issued === "1" ? await takeIssuedStudentCredentials(id) : null;
+    staffIsAdmin && issued === "1" ? await readIssuedStudentCredentials(id) : null;
   const plans = staffIsAdmin ? await prisma.plan.findMany() : [];
   const student = await prisma.user.findUnique({ where: { id } });
   if (!student || student.role !== "STUDENT") {

@@ -13,18 +13,17 @@ export async function setIssuedStudentCredentials(
     httpOnly: true,
     sameSite: "lax",
     maxAge: 600,
-    path: `/admin/students/${studentId}`,
+    path: "/admin",
   });
 }
 
-export async function takeIssuedStudentCredentials(
+/** Read-only: safe to call from Server Components (no cookie delete). */
+export async function readIssuedStudentCredentials(
   studentId: string
 ): Promise<IssuedStudentCredentials | null> {
   const jar = await cookies();
-  const key = cookieName(studentId);
-  const raw = jar.get(key)?.value;
+  const raw = jar.get(cookieName(studentId))?.value;
   if (!raw) return null;
-  jar.delete(key);
   try {
     const parsed = JSON.parse(raw) as IssuedStudentCredentials;
     if (!parsed.login || !parsed.pass) return null;
@@ -32,4 +31,9 @@ export async function takeIssuedStudentCredentials(
   } catch {
     return null;
   }
+}
+
+export async function clearIssuedStudentCredentials(studentId: string) {
+  const jar = await cookies();
+  jar.delete(cookieName(studentId));
 }
