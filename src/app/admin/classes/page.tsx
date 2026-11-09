@@ -9,11 +9,21 @@ import { formatDate, formatTime, isAdmin, plural } from "@/lib/format";
 export default async function AdminClassesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; created?: string; deleted?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; deleted?: string; count?: string }>;
 }) {
   const user = await requireStaff();
   const staffIsAdmin = isAdmin(user.role);
-  const { error, created, deleted } = await searchParams;
+  const { error, created, deleted, count } = await searchParams;
+
+  const weekdayLabels = [
+    { value: 1, label: "Пн" },
+    { value: 2, label: "Вт" },
+    { value: 3, label: "Ср" },
+    { value: 4, label: "Чт" },
+    { value: 5, label: "Пт" },
+    { value: 6, label: "Сб" },
+    { value: 0, label: "Вс" },
+  ];
 
   const now = new Date();
   const [classes, teachers] = await Promise.all([
@@ -33,7 +43,11 @@ export default async function AdminClassesPage({
       </h1>
 
       {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
-      {created && <p className="app-card text-sm text-success">Занятие добавлено в расписание.</p>}
+      {created && (
+        <p className="app-card text-sm text-success">
+          {count ? `Добавлено занятий в расписание: ${count}.` : "Занятие добавлено в расписание."}
+        </p>
+      )}
       {deleted && <p className="app-card text-sm text-muted">Занятие удалено.</p>}
 
       {staffIsAdmin && (
@@ -71,7 +85,7 @@ export default async function AdminClassesPage({
             </div>
             <div>
               <label className="field-label" htmlFor="date">
-                Дата
+                Дата (неделя отсчёта)
               </label>
               <input id="date" name="date" type="date" required className="field" />
             </div>
@@ -111,6 +125,38 @@ export default async function AdminClassesPage({
                 type="number"
                 min={1}
                 defaultValue={20}
+                className="field"
+              />
+            </div>
+            <div className="md:col-span-3">
+              <p className="field-label">Повтор по дням недели</p>
+              <p className="mt-1 text-xs text-muted">
+                Отметьте дни — занятие создастся на каждую выбранную неделю вперёд. Без галочек — одно
+                занятие на указанную дату.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {weekdayLabels.map((day) => (
+                  <label
+                    key={day.value}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm has-[:checked]:border-accent-400 has-[:checked]:bg-accent-400/10"
+                  >
+                    <input type="checkbox" name="weekdays" value={day.value} className="sr-only" />
+                    {day.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="field-label" htmlFor="weeksAhead">
+                Недель вперёд
+              </label>
+              <input
+                id="weeksAhead"
+                name="weeksAhead"
+                type="number"
+                min={1}
+                max={52}
+                defaultValue={26}
                 className="field"
               />
             </div>

@@ -6,6 +6,10 @@ import { prisma } from "@/lib/db";
 import { requireStaff } from "@/actions/auth";
 import { isAdmin } from "@/lib/format";
 import { randomBytes } from "node:crypto";
+import {
+  buildRecurringClassStarts,
+  DEFAULT_RECURRING_WEEKS,
+} from "@/lib/recurring-classes";
 
 export async function toggleDemoModeAction(enabled: boolean) {
   const staff = await requireStaff();
@@ -136,6 +140,53 @@ export async function createClassAction(formData: FormData) {
     redirect("/admin/classes?error=Заполните все поля занятия.");
   }
 
+  const weekdays = formData
+    .getAll("weekdays")
+    .map((v) => Number(v))
+    .filter((d) => d >= 0 && d <= 6);
+  const weeksAhead = Math.min(
+    52,
+    Math.max(1, Number(formData.get("weeksAhead") || DEFAULT_RECURRING_WEEKS))
+  );
+
+  const startsList =
+    weekdays.length > 0
+      ? buildRecurringClassStarts({ anchorDateIso: date, time, weekdays, weeksAhead })
+      : [];
+
+  if (weekdays.length > 0 && startsList.length === 0) {
+    redirect("/admin/classes?error=Не удалось построить расписание по выбранным дням.");
+  }
+
+  const base = {
+    teacherId,
+    title,
+    level,
+    description: `${title} — ${level.toLowerCase()}.`,
+    room,
+    capacity,
+    venueId: "venue-dekadance",
+    isDemo: false,
+  };
+
+  if (startsList.length > 0) {
+    const now = Date.now();
+    const slots = startsList.filter((startsAt) => startsAt.getTime() >= now - duration * 60_000);
+    if (slots.length === 0) {
+      redirect("/admin/classes?error=Все слоты в прошлом — укажите дату ближе к сегодня.");
+    }
+    for (const startsAt of slots) {
+      const endsAt = new Date(startsAt.getTime() + duration * 60_000);
+      await prisma.danceClass.create({
+        data: { ...base, startsAt, endsAt },
+      });
+    }
+    revalidatePath("/admin/classes");
+    revalidatePath("/schedule");
+    revalidatePath("/");
+    redirect(`/admin/classes?created=1&count=${slots.length}`);
+  }
+
   const startsAt = new Date(`${date}T${time}`);
   if (Number.isNaN(startsAt.getTime())) {
     redirect("/admin/classes?error=Некорректная дата или время.");
@@ -143,16 +194,7 @@ export async function createClassAction(formData: FormData) {
   const endsAt = new Date(startsAt.getTime() + duration * 60_000);
 
   await prisma.danceClass.create({
-    data: {
-      teacherId,
-      title,
-      level,
-      description: `${title} — ${level.toLowerCase()}.`,
-      startsAt,
-      endsAt,
-      room,
-      capacity,
-    },
+    data: { ...base, startsAt, endsAt },
   });
 
   revalidatePath("/admin/classes");
