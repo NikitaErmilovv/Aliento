@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { BlockUserButton } from "@/components/BlockUserButton";
 import { SubscriptionAdminActions } from "@/components/SubscriptionAdminActions";
 import { GrantSubscriptionForm } from "@/components/GrantSubscriptionForm";
+import { AdminStudentEditForm } from "@/components/AdminStudentEditForm";
 import { requireStaff } from "@/actions/auth";
 import { prisma } from "@/lib/db";
 import {
@@ -21,13 +22,13 @@ export default async function AdminStudentProfile({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; granted?: string }>;
+  searchParams: Promise<{ error?: string; granted?: string; saved?: string }>;
 }) {
   const staff = await requireStaff();
   const staffIsAdmin = isAdmin(staff.role);
 
   const { id } = await params;
-  const { error, granted } = await searchParams;
+  const { error, granted, saved } = await searchParams;
   const plans = staffIsAdmin ? await prisma.plan.findMany() : [];
   const student = await prisma.user.findUnique({ where: { id } });
   if (!student || student.role !== "STUDENT") {
@@ -46,6 +47,7 @@ export default async function AdminStudentProfile({
     <div className="space-y-5">
       {error && <p className="app-card border-danger/40 text-sm text-danger">{error}</p>}
       {granted && <p className="app-card text-sm text-success">Абонемент выдан ученику.</p>}
+      {saved && <p className="app-card text-sm text-success">Данные ученика сохранены.</p>}
       <Link href="/admin/students" className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground">
         <ArrowLeft className="h-4 w-4" />
         Все ученики
@@ -80,6 +82,15 @@ export default async function AdminStudentProfile({
           </div>
         </div>
       </section>
+
+      <AdminStudentEditForm
+        studentId={student.id}
+        name={student.name}
+        email={student.email}
+        phone={student.phone}
+        dateOfBirth={student.dateOfBirth}
+        canEditLogin={staffIsAdmin}
+      />
 
       <div className={`grid gap-4 sm:grid-cols-2 ${staffIsAdmin ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
         <div className="app-card">

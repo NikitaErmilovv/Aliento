@@ -98,6 +98,79 @@ export async function createStudentByAdminAction(formData: FormData) {
   redirect("/admin/students?created=1");
 }
 
+export async function updateStudentProfileAction(formData: FormData) {
+  const staff = await requireStaff();
+  const studentId = String(formData.get("studentId") || "");
+  if (!studentId) redirect("/admin/students?error=Ученик не найден.");
+
+  const student = await prisma.user.findUnique({ where: { id: studentId } });
+  if (!student || student.role !== "STUDENT") {
+    redirect("/admin/students?error=Ученик не найден.");
+  }
+
+  const staffIsAdmin = isAdmin(staff.role);
+  const name = String(formData.get("name") || "").trim();
+  const phoneRaw = String(formData.get("phone") || "").trim();
+  const dateOfBirthRaw = String(formData.get("dateOfBirth") || "").trim();
+  const emailRaw = String(formData.get("email") || "")
+    .trim()
+    .toLowerCase();
+  const newPassword = String(formData.get("newPassword") || "");
+
+  if (!name || !phoneRaw) {
+    redirect(`/admin/students/${studentId}?error=Укажите имя и телефон.`);
+  }
+
+  if (!isValidRuPhone(phoneRaw)) {
+    redirect(`/admin/students/${studentId}?error=Некорректный номер телефона.`);
+  }
+
+  const phone = normalizePhone(phoneRaw);
+  const data: {
+    name: string;
+    phone: string;
+    email?: string;
+    dateOfBirth?: string;
+    passwordHash?: string;
+  } = { name, phone };
+
+  if (staffIsAdmin) {
+    if (!emailRaw) {
+      redirect(`/admin/students/${studentId}?error=Укажите email для входа.`);
+    }
+    if (emailRaw !== student.email) {
+      const taken = await prisma.user.findUnique({ where: { email: emailRaw } });
+      if (taken) redirect(`/admin/students/${studentId}?error=Этот email уже занят.`);
+      data.email = emailRaw;
+    }
+
+    if (dateOfBirthRaw) {
+      const normalized = normalizeDateOfBirth(dateOfBirthRaw);
+      if (!normalized || !isValidDateOfBirth(normalized)) {
+        redirect(`/admin/students/${studentId}?error=Некорректная дата рождения.`);
+      }
+      data.dateOfBirth = normalized;
+    } else {
+      data.dateOfBirth = undefined;
+    }
+
+    if (newPassword.length > 0) {
+      if (newPassword.length < 6) {
+        redirect(`/admin/students/${studentId}?error=Новый пароль — не короче 6 символов.`);
+      }
+      data.passwordHash = hashPassword(newPassword);
+    }
+  }
+
+  await prisma.user.update({ where: { id: studentId }, data });
+
+  revalidatePath("/admin/students");
+  revalidatePath(`/admin/students/${studentId}`);
+  revalidatePath("/cabinet");
+  revalidatePath("/cabinet/profile");
+  redirect(`/admin/students/${studentId}?saved=1`);
+}
+
 export async function grantTeacherRoleAction(formData: FormData) {
   const staff = await requireStaff();
   if (!isAdmin(staff.role)) redirect("/admin/settings?error=Недостаточно прав.");
