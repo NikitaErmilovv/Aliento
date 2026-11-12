@@ -14,8 +14,8 @@ import {
 
 const dataFile = join(process.cwd(), "data", "aliento.json");
 
-function assert(cond: unknown, message: string) {
-  if (!cond) throw new Error(message);
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) throw new Error(message);
 }
 
 async function main() {
