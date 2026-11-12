@@ -1,5 +1,6 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { STAFF_EMAIL, staffBootstrapPassword } from "@/lib/staff-bootstrap";
 import { join } from "node:path";
 import { filterDemo, isDemoMode } from "@/lib/demo-filter";
 import { DEFAULT_HALL_ACTIVITY_TYPES } from "@/lib/hall-activity-types";
@@ -292,8 +293,11 @@ const CLASS_TEMPLATES = [
   { weekday: 6, hour: 15, minutes: 90, title: "Бачата для новичков", level: "Начальный уровень", room: "Зал 2", capacity: 18, teacher: 0 },
 ];
 
+function staffPasswordHash(role: keyof typeof STAFF_EMAIL) {
+  return hashPassword(staffBootstrapPassword(role));
+}
+
 function seed(): Store {
-  const passwordHash = hashPassword("aliento123");
   const now = new Date();
 
   function birthDateFromNow(daysUntilBirthday: number, birthYear: number) {
@@ -309,6 +313,7 @@ function seed(): Store {
     email: string,
     phone: string,
     role: string,
+    passwordHash: string,
     createdDaysAgo: number,
     dateOfBirth?: string
   ) => ({
@@ -324,18 +329,33 @@ function seed(): Store {
     ...(dateOfBirth ? { dateOfBirth } : {}),
   });
 
-  const owner = staffUser("Владелец Aliento", "owner@aliento.test", "+7 900 000-00-01", "OWNER", 400);
-  const admin = staffUser("Администратор", "admin@aliento.test", "+7 900 000-00-02", "ADMIN", 380);
-  const anastasiaUser = staffUser("Анастасия Ромова", "anastasia@aliento.test", "+7 900 000-00-03", "TEACHER", 360);
-  const alexanderUser = staffUser("Александр Дин", "alexander@aliento.test", "+7 900 000-00-04", "TEACHER", 350);
+  const demoStudentHash = staffPasswordHash("demoStudent");
+  const owner = staffUser("Владелец Aliento", STAFF_EMAIL.owner, "+7 900 000-00-01", "OWNER", staffPasswordHash("owner"), 400);
+  const admin = staffUser("Администратор", STAFF_EMAIL.admin, "+7 900 000-00-02", "ADMIN", staffPasswordHash("admin"), 380);
+  const anastasiaUser = staffUser(
+    "Анастасия Ромова",
+    STAFF_EMAIL.teacherAnastasia,
+    "+7 900 000-00-03",
+    "TEACHER",
+    staffPasswordHash("teacherAnastasia"),
+    360
+  );
+  const alexanderUser = staffUser(
+    "Александр Дин",
+    STAFF_EMAIL.teacherAlexander,
+    "+7 900 000-00-04",
+    "TEACHER",
+    staffPasswordHash("teacherAlexander"),
+    350
+  );
 
   const students = [
-    staffUser("Анна Петрова", "anna@aliento.test", "+7 900 111-22-33", "STUDENT", 150, birthDateFromNow(3, 1998)),
-    staffUser("Мария Иванова", "maria@aliento.test", "+7 900 222-33-44", "STUDENT", 120, birthDateFromNow(0, 2001)),
-    staffUser("Дмитрий Смирнов", "dmitry@aliento.test", "+7 900 333-44-55", "STUDENT", 64, birthDateFromNow(10, 1995)),
-    staffUser("Елена Кузнецова", "elena@aliento.test", "+7 900 444-55-66", "STUDENT", 40, "1992-06-15"),
-    staffUser("Алексей Волков", "alexey@aliento.test", "+7 900 555-66-77", "STUDENT", 21, "1989-11-02"),
-    staffUser("Ольга Соколова", "olga@aliento.test", "+7 900 666-77-88", "STUDENT", 9, birthDateFromNow(7, 2003)),
+    staffUser("Анна Петрова", "anna@aliento.test", "+7 900 111-22-33", "STUDENT", demoStudentHash, 150, birthDateFromNow(3, 1998)),
+    staffUser("Мария Иванова", STAFF_EMAIL.demoStudent, "+7 900 222-33-44", "STUDENT", demoStudentHash, 120, birthDateFromNow(0, 2001)),
+    staffUser("Дмитрий Смирнов", "dmitry@aliento.test", "+7 900 333-44-55", "STUDENT", demoStudentHash, 64, birthDateFromNow(10, 1995)),
+    staffUser("Елена Кузнецова", "elena@aliento.test", "+7 900 444-55-66", "STUDENT", demoStudentHash, 40, "1992-06-15"),
+    staffUser("Алексей Волков", "alexey@aliento.test", "+7 900 555-66-77", "STUDENT", demoStudentHash, 21, "1989-11-02"),
+    staffUser("Ольга Соколова", "olga@aliento.test", "+7 900 666-77-88", "STUDENT", demoStudentHash, 9, birthDateFromNow(7, 2003)),
   ];
 
   const anastasia = {
@@ -565,9 +585,8 @@ export function defaultSchoolPlans(): Plan[] {
   ];
 }
 
-/** Empty operational data; keeps test staff logins (password aliento123). demoMode off. */
+/** Empty operational data; staff bootstrap accounts. demoMode off. */
 export function seedClean(): Store {
-  const passwordHash = hashPassword("aliento123");
   const now = new Date().toISOString();
 
   const staffUser = (
@@ -575,6 +594,7 @@ export function seedClean(): Store {
     email: string,
     phone: string,
     role: string,
+    passwordHash: string,
     dateOfBirth?: string
   ): User => ({
     id: uid(),
@@ -590,11 +610,30 @@ export function seedClean(): Store {
     ...(dateOfBirth ? { dateOfBirth } : {}),
   });
 
-  const owner = staffUser("Владелец Aliento", "owner@aliento.test", "+7 900 000-00-01", "OWNER");
-  const admin = staffUser("Администратор", "admin@aliento.test", "+7 900 000-00-02", "ADMIN");
-  const anastasiaUser = staffUser("Анастасия Ромова", "anastasia@aliento.test", "+7 900 000-00-03", "TEACHER");
-  const alexanderUser = staffUser("Александр Дин", "alexander@aliento.test", "+7 900 000-00-04", "TEACHER");
-  const student = staffUser("Тестовый ученик", "student@aliento.test", "+7 900 111-22-33", "STUDENT", "1998-03-15");
+  const owner = staffUser("Владелец Aliento", STAFF_EMAIL.owner, "+7 900 000-00-01", "OWNER", staffPasswordHash("owner"));
+  const admin = staffUser("Администратор", STAFF_EMAIL.admin, "+7 900 000-00-02", "ADMIN", staffPasswordHash("admin"));
+  const anastasiaUser = staffUser(
+    "Анастасия Ромова",
+    STAFF_EMAIL.teacherAnastasia,
+    "+7 900 000-00-03",
+    "TEACHER",
+    staffPasswordHash("teacherAnastasia")
+  );
+  const alexanderUser = staffUser(
+    "Александр Дин",
+    STAFF_EMAIL.teacherAlexander,
+    "+7 900 000-00-04",
+    "TEACHER",
+    staffPasswordHash("teacherAlexander")
+  );
+  const student = staffUser(
+    "Мария Иванова",
+    STAFF_EMAIL.demoStudent,
+    "+7 900 222-33-44",
+    "STUDENT",
+    staffPasswordHash("demoStudent"),
+    "2001-06-12"
+  );
 
   const anastasia: Teacher = {
     id: uid(),

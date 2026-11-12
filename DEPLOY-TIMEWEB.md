@@ -10,19 +10,18 @@
 
 `NODE_ENV=production` — по желанию.
 
-## Учётки после первого старта
+## Учётки staff
 
-Если **`data/aliento.json` нет**, при старте копируется **`data/aliento.initial.json`** (твои ученики и staff, без демо).
+Если **`data/aliento.json` нет**, при старте копируется **`data/aliento.initial.json`**.
 
-Пароль у тестовых staff и `uch-…@aliento.test`: **`aliento123`**.
+Пароли staff на проде можно задать через переменные `ALIENTO_BOOTSTRAP_*_PASSWORD` (см. `src/lib/staff-bootstrap.ts`). Логины на странице входа не показываются.
 
-| Роль | Логин |
-|------|--------|
-| Владелец | `owner@aliento.test` |
-| Админ | `admin@aliento.test` |
-| Препод | `anastasia@aliento.test`, `alexander@aliento.test` |
-| Ученик | `student@aliento.test` + созданные `uch-…` |
+На уже работающем сервере с устаревшими `@aliento.test`:
 
-Если на сервере **старая демо-база** — в консоли один раз: `rm -f data/aliento.json`, перезапуск.
+```bash
+npx tsx scripts/refresh-staff-bootstrap.ts data/aliento.json
+```
+
+Если нужен полностью чистый склад — `npx tsx scripts/reset-clean.ts` (стирает операционные данные).
 
 **Данные дальше** только в `data/aliento.json` на диске — бэкапь перед деплоем.

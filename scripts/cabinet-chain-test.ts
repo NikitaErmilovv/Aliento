@@ -5,6 +5,7 @@
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { STAFF_EMAIL } from "../src/lib/staff-bootstrap";
 import { prisma } from "../src/lib/db";
 import {
   classDurationHours,
@@ -25,9 +26,9 @@ async function main() {
     console.log("Using existing data/aliento.json (run reset-clean.ts for empty slate)");
   }
 
-  const student = await prisma.user.findUnique({ where: { email: "student@aliento.test" } });
-  const admin = await prisma.user.findUnique({ where: { email: "admin@aliento.test" } });
-  const teacherUser = await prisma.user.findUnique({ where: { email: "anastasia@aliento.test" } });
+  const student = await prisma.user.findUnique({ where: { email: STAFF_EMAIL.demoStudent } });
+  const admin = await prisma.user.findUnique({ where: { email: STAFF_EMAIL.admin } });
+  const teacherUser = await prisma.user.findUnique({ where: { email: STAFF_EMAIL.teacherAnastasia } });
   assert(student && admin && teacherUser, "Test users missing — run reset-clean.ts");
 
   const teacher = await prisma.teacher.findUnique({ where: { userId: teacherUser.id } });

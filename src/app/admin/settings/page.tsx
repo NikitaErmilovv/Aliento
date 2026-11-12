@@ -110,7 +110,7 @@ export default async function AdminSettingsPage({
         <h2 className="app-card-title">Выдать роль преподавателя</h2>
         <p className="mt-2 text-sm text-muted">
           Укажите email существующего пользователя — он получит доступ к админ-панели с правами
-          преподавателя. Тестовый аккаунт: anastasia@aliento.test / aliento123
+          преподавателя.
         </p>
         <form action={grantTeacherRoleAction} className="mt-6 grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
