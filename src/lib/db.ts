@@ -330,28 +330,28 @@ function seed(): Store {
   });
 
   const demoStudentHash = staffPasswordHash("demoStudent");
-  const owner = staffUser("Владелец Aliento", STAFF_EMAIL.owner, "+7 900 000-00-01", "OWNER", staffPasswordHash("owner"), 400);
+  const owner = staffUser("Владелец", STAFF_EMAIL.owner, "+7 900 000-00-01", "OWNER", staffPasswordHash("owner"), 400);
   const admin = staffUser("Администратор", STAFF_EMAIL.admin, "+7 900 000-00-02", "ADMIN", staffPasswordHash("admin"), 380);
   const anastasiaUser = staffUser(
-    "Анастасия Ромова",
-    STAFF_EMAIL.teacherAnastasia,
+    "Преподаватель",
+    STAFF_EMAIL.teacher1,
     "+7 900 000-00-03",
     "TEACHER",
-    staffPasswordHash("teacherAnastasia"),
+    staffPasswordHash("teacher1"),
     360
   );
   const alexanderUser = staffUser(
-    "Александр Дин",
-    STAFF_EMAIL.teacherAlexander,
+    "Преподаватель 2",
+    STAFF_EMAIL.teacher2,
     "+7 900 000-00-04",
     "TEACHER",
-    staffPasswordHash("teacherAlexander"),
+    staffPasswordHash("teacher2"),
     350
   );
 
   const students = [
     staffUser("Анна Петрова", "anna@aliento.test", "+7 900 111-22-33", "STUDENT", demoStudentHash, 150, birthDateFromNow(3, 1998)),
-    staffUser("Мария Иванова", STAFF_EMAIL.demoStudent, "+7 900 222-33-44", "STUDENT", demoStudentHash, 120, birthDateFromNow(0, 2001)),
+    staffUser("Ученик", STAFF_EMAIL.demoStudent, "+7 900 222-33-44", "STUDENT", demoStudentHash, 120, birthDateFromNow(0, 2001)),
     staffUser("Дмитрий Смирнов", "dmitry@aliento.test", "+7 900 333-44-55", "STUDENT", demoStudentHash, 64, birthDateFromNow(10, 1995)),
     staffUser("Елена Кузнецова", "elena@aliento.test", "+7 900 444-55-66", "STUDENT", demoStudentHash, 40, "1992-06-15"),
     staffUser("Алексей Волков", "alexey@aliento.test", "+7 900 555-66-77", "STUDENT", demoStudentHash, 21, "1989-11-02"),
@@ -610,24 +610,24 @@ export function seedClean(): Store {
     ...(dateOfBirth ? { dateOfBirth } : {}),
   });
 
-  const owner = staffUser("Владелец Aliento", STAFF_EMAIL.owner, "+7 900 000-00-01", "OWNER", staffPasswordHash("owner"));
+  const owner = staffUser("Владелец", STAFF_EMAIL.owner, "+7 900 000-00-01", "OWNER", staffPasswordHash("owner"));
   const admin = staffUser("Администратор", STAFF_EMAIL.admin, "+7 900 000-00-02", "ADMIN", staffPasswordHash("admin"));
   const anastasiaUser = staffUser(
-    "Анастасия Ромова",
-    STAFF_EMAIL.teacherAnastasia,
+    "Преподаватель",
+    STAFF_EMAIL.teacher1,
     "+7 900 000-00-03",
     "TEACHER",
-    staffPasswordHash("teacherAnastasia")
+    staffPasswordHash("teacher1")
   );
   const alexanderUser = staffUser(
-    "Александр Дин",
-    STAFF_EMAIL.teacherAlexander,
+    "Преподаватель 2",
+    STAFF_EMAIL.teacher2,
     "+7 900 000-00-04",
     "TEACHER",
-    staffPasswordHash("teacherAlexander")
+    staffPasswordHash("teacher2")
   );
   const student = staffUser(
-    "Мария Иванова",
+    "Ученик",
     STAFF_EMAIL.demoStudent,
     "+7 900 222-33-44",
     "STUDENT",

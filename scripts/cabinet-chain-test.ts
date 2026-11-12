@@ -28,7 +28,7 @@ async function main() {
 
   const student = await prisma.user.findUnique({ where: { email: STAFF_EMAIL.demoStudent } });
   const admin = await prisma.user.findUnique({ where: { email: STAFF_EMAIL.admin } });
-  const teacherUser = await prisma.user.findUnique({ where: { email: STAFF_EMAIL.teacherAnastasia } });
+  const teacherUser = await prisma.user.findUnique({ where: { email: STAFF_EMAIL.teacher1 } });
   assert(student && admin && teacherUser, "Test users missing — run reset-clean.ts");
 
   const teacher = await prisma.teacher.findUnique({ where: { userId: teacherUser.id } });

@@ -10,54 +10,34 @@ type Store = { users: User[]; [key: string]: unknown };
 
 const store: Store = JSON.parse(readFileSync(dataFile, "utf8"));
 
-const rules: Array<{ role: string; match: (u: User) => boolean; email: string; pwdKey: keyof typeof STAFF_EMAIL }> = [
-  {
-    role: "OWNER",
-    match: (u) => u.role === "OWNER" || u.email === "owner@aliento.test",
-    email: STAFF_EMAIL.owner,
-    pwdKey: "owner",
-  },
-  {
-    role: "ADMIN",
-    match: (u) => u.role === "ADMIN" || u.email === "admin@aliento.test",
-    email: STAFF_EMAIL.admin,
-    pwdKey: "admin",
-  },
-  {
-    role: "TEACHER",
-    match: (u) =>
-      u.role === "TEACHER" &&
-      (u.email === "anastasia@aliento.test" || /анастасия/i.test(u.name)),
-    email: STAFF_EMAIL.teacherAnastasia,
-    pwdKey: "teacherAnastasia",
-  },
-  {
-    role: "TEACHER",
-    match: (u) =>
-      u.role === "TEACHER" &&
-      (u.email === "alexander@aliento.test" || /александр/i.test(u.name)),
-    email: STAFF_EMAIL.teacherAlexander,
-    pwdKey: "teacherAlexander",
-  },
-  {
-    role: "STUDENT",
-    match: (u) =>
-      u.role === "STUDENT" &&
-      (u.email === "student@aliento.test" || /тестовый ученик/i.test(u.name)),
-    email: STAFF_EMAIL.demoStudent,
-    pwdKey: "demoStudent",
-  },
-];
+const DEMO_STUDENT_LEGACY = new Set([
+  "student@aliento.test",
+  "student@aliento.dance",
+  "maria.ivanova@student.aliento.dance",
+]);
 
-for (const rule of rules) {
-  const user = store.users.find(rule.match);
-  if (!user) continue;
-  user.email = rule.email;
-  user.passwordHash = hashPassword(staffBootstrapPassword(rule.pwdKey));
-  if (rule.pwdKey === "demoStudent") {
-    user.name = "Мария Иванова";
-  }
+function patchUser(user: User, email: string, pwdKey: keyof typeof STAFF_EMAIL, name: string) {
+  user.email = email;
+  user.name = name;
+  user.passwordHash = hashPassword(staffBootstrapPassword(pwdKey));
 }
+
+const owner = store.users.find((u) => u.role === "OWNER");
+if (owner) patchUser(owner, STAFF_EMAIL.owner, "owner", "Владелец");
+
+const admin = store.users.find((u) => u.role === "ADMIN");
+if (admin) patchUser(admin, STAFF_EMAIL.admin, "admin", "Администратор");
+
+const teachers = store.users
+  .filter((u) => u.role === "TEACHER")
+  .sort((a, b) => a.id.localeCompare(b.id));
+if (teachers[0]) patchUser(teachers[0], STAFF_EMAIL.teacher1, "teacher1", "Преподаватель");
+if (teachers[1]) patchUser(teachers[1], STAFF_EMAIL.teacher2, "teacher2", "Преподаватель 2");
+
+const demoStudent =
+  store.users.find((u) => u.role === "STUDENT" && DEMO_STUDENT_LEGACY.has(u.email)) ??
+  store.users.find((u) => u.role === "STUDENT" && /^(ученик|тестовый ученик)/i.test(u.name.trim()));
+if (demoStudent) patchUser(demoStudent, STAFF_EMAIL.demoStudent, "demoStudent", "Ученик");
 
 writeFileSync(dataFile, JSON.stringify(store, null, 2));
 console.log(`Updated staff bootstrap accounts in ${dataFile}`);
